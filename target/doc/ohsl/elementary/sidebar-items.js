@@ -1,0 +1,1 @@
+initSidebarItems({"constant":[["E","e"],["PI","pi"],["PI_2","pi/2 "],["SQRT2","Square root of 2"]],"fn":[["test_function",""]]});

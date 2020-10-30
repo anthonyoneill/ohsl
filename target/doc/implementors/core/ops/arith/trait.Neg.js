@@ -1,0 +1,3 @@
+(function() {var implementors = {};
+implementors["ohsl"] = [{"text":"impl&lt;T:&nbsp;Clone + Signed&gt; Neg for Complex&lt;T&gt;","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Clone + Neg&lt;Output = T&gt;&gt; Neg for Vector&lt;T&gt;","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Clone + Neg&lt;Output = T&gt;&gt; Neg for Matrix&lt;T&gt;","synthetic":false,"types":[]}];
+if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
