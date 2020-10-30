@@ -5,6 +5,8 @@ authors = ["anthonyoneill <ajoneill@protonmail.com>"]
 edition = "2018"
 description = "A collection of numerical routines and mathematical types for use in scientific computing."
 license = "MIT"
+repository = "https://github.com/anthonyoneill/ohsl"
+readme = "README.md"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
 
