@@ -1,1 +1,0 @@
-initSidebarItems({"constant":[["E","e"],["I","i"],["PI","pi"],["PI_2","pi/2 "],["SQRT2","Square root of 2"]]});

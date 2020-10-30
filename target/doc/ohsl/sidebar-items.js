@@ -1,1 +1,0 @@
-initSidebarItems({"mod":[["complex",""],["constant",""],["elementary",""],["matrix",""],["mesh1d",""],["mesh2d",""],["newton",""],["traits",""],["vector",""]]});

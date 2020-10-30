@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Vector",""]],"type":[["Vec64",""]]});

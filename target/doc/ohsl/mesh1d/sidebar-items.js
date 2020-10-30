@@ -1,1 +1,0 @@
-initSidebarItems({"struct":[["Mesh1D",""]]});

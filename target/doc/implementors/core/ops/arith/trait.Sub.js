@@ -1,3 +1,0 @@
-(function() {var implementors = {};
-implementors["ohsl"] = [{"text":"impl&lt;T:&nbsp;Clone + Number&gt; Sub&lt;Complex&lt;T&gt;&gt; for Complex&lt;T&gt;","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Number&gt; Sub&lt;T&gt; for Complex&lt;T&gt;","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Clone + Number&gt; Sub&lt;Vector&lt;T&gt;&gt; for Vector&lt;T&gt;","synthetic":false,"types":[]},{"text":"impl&lt;T:&nbsp;Clone + Number&gt; Sub&lt;Matrix&lt;T&gt;&gt; for Matrix&lt;T&gt;","synthetic":false,"types":[]}];
-if (window.register_implementors) {window.register_implementors(implementors);} else {window.pending_implementors = implementors;}})()
