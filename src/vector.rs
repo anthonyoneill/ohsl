@@ -1,6 +1,7 @@
 use core::ops::{Index, IndexMut, Neg, Add, Sub, Mul, Div};
 use core::ops::{AddAssign, SubAssign, MulAssign, DivAssign};
-use std::{fmt, fs::File, io::Write};
+use std::{fmt, fs::File, io::Write, cmp::Ordering};
+use rand::Rng;
 
 pub use crate::traits::{Number, Signed, Zero, One};
 pub use crate::complex::Complex;
@@ -54,12 +55,31 @@ impl<T> Vector<T> {
         self.size += 1;
     }
 
+    /// Insert a new element into the Vector at a specified position 
+    #[inline]
+    pub fn insert(&mut self, pos: usize, new_elem: T ) {
+        self.vec.insert( pos, new_elem );
+        self.size += 1;
+    }
+
     /// Remove the last element from the vector and return it
     #[inline]
     pub fn pop(&mut self) -> T {
         let result = self.vec.pop();
         self.size -= 1;
         result.unwrap()
+    }
+}
+
+impl<T: std::cmp::PartialEq> Vector<T> {
+    /// Return the index of the first element in the Vector equal to a given value 
+    #[inline]
+    pub fn find(&self, value: T ) -> usize {
+        let index = self.vec.iter().position( |x| *x == value );
+        match index {
+            None => panic!( "Entry not found in Vector." ),
+            Some(index) => return index,
+        }
     }
 }
 
@@ -432,6 +452,17 @@ impl Vector<f64> {
         }
         result
     }
+
+    // Create a vector containing n random elements between 0 and 1
+    #[inline]
+    pub fn random( size: usize ) -> Self {
+        let mut vec = vec![ 0.0; size ];
+        let mut rng = rand::thread_rng();
+        for i in 0..size {
+            vec[i] = rng.gen::<f64>()
+        }
+        Vector{ vec, size }
+    }
 }
 
 impl<T> fmt::Debug for Vector<T> where
@@ -451,3 +482,22 @@ impl<T> fmt::Display for Vector<T> where
         write!(f, "{:?}", self.vec )
     }
 } 
+
+impl<T: Ord + PartialEq + PartialOrd> Vector<T>
+{
+    /// Sort the Vector of elements
+    pub fn sort(&mut self) {
+        self.vec.sort_unstable();
+    }
+}
+
+impl<T: PartialEq + PartialOrd> Vector<T>
+{
+    /// Sort the Vector of elements using a comparison function
+    pub fn sort_by<F>(&mut self, compare: F )
+    where
+        F: FnMut(&T, &T) -> Ordering,
+    {
+        self.vec.sort_unstable_by( compare );
+    }
+}

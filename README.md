@@ -14,7 +14,7 @@ Oak Hamilton Scientific Library (HSL) is a collection of numerical routines writ
 - [ ] Roots of polynomials
 - [x] Root finding 
 - [ ] Eigensystems
-- [ ] Sparse linear algebra 
+- [x] Sparse linear algebra 
 - [ ] Differential equations 
 - [ ] Chebyshev approximation
 

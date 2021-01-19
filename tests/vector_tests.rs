@@ -153,6 +153,22 @@ fn test_push_pop() {
 }
 
 #[test]
+fn test_vector_find() {
+    let u = Vector::<u32>::create( vec![ 1, 2, 7, 4, 5 ] );
+    let index = u.find( 7 );
+    assert_eq!( index, 2 );
+    //let index = u.find( 8 );
+}
+
+#[test]
+fn test_vector_insert() {
+    let mut u = Vector::<u32>::create( vec![ 1, 2, 7, 4, 5 ] );
+    u.insert( 0, 8 );
+    assert_eq!( u[0], 8 );
+    assert_eq!( u[1], 1 );
+}
+
+#[test]
 fn test_vector_abs() {
     let u = Vector::<i32>::new( 5, -2 );
     let v = u.abs();
@@ -205,9 +221,36 @@ fn test_norms() {
 }
 
 #[test]
+fn test_vector_random() {
+    let v = Vec64::random( 5 );
+    assert_eq!( v.size(), 5 );
+    assert!( v[0] > 0.0 );
+    assert!( v[0] < 1.0 );
+    assert!( v[0] - v[1] != 0.0 );
+}
+
+#[test]
 fn test_zeros_ones() {
     let zeros = Vector::<i32>::zeros( 5 );
     assert_eq!( zeros[4], 0 );
     let ones = Vector::<f64>::ones( 7 );
     assert_eq!( ones[6], 1.0 );
+}
+
+#[test]
+fn test_sort() {
+    let mut u = Vector::<u32>::create( vec![ 5, 4, 3, 2, 1 ] );
+    u.sort();
+    assert_eq!( u[0], 1 );
+    assert_eq!( u[1], 2 );
+    assert_eq!( u[2], 3 );
+    assert_eq!( u[3], 4 );
+    assert_eq!( u[4], 5 );
+    let mut v = Vec64::create( vec![ 5.0, 4.0, 3.0, 2.0, 1.0 ] );
+    v.sort_by(|a, b| a.partial_cmp(b).unwrap());
+    assert_eq!( v[0], 1.0 );
+    assert_eq!( v[1], 2.0 );
+    assert_eq!( v[2], 3.0 );
+    assert_eq!( v[3], 4.0 );
+    assert_eq!( v[4], 5.0 );
 }
