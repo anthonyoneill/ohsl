@@ -105,7 +105,32 @@ use ohsl::vector::{Vector, Vec64};
     }
 
     #[test]
-    fn test_sparse_solve() {
+    fn test_sparse_solve_bicg() {
+        let mut triplets = Vector::<Tr64>::empty();
+        triplets.push( Tr64::new( 0, 0, 1.0 ) );
+        triplets.push( Tr64::new( 0, 1, 2.0 ) );
+        triplets.push( Tr64::new( 1, 0, 3.0 ) );
+        triplets.push( Tr64::new( 1, 1, 4.0 ) );
+        triplets.push( Tr64::new( 1, 2, 5.0 ) );
+        triplets.push( Tr64::new( 2, 1, 6.0 ) );
+        triplets.push( Tr64::new( 2, 2, 7.0 ) );
+        let sparse = Sparse::<f64>::new( 3, 3, &mut triplets );
+        let b = Vec64::new( 3, 1.0 );
+        // Set the initial guess
+        let mut x = Vec64::new( 3, 1.0 );
+        x[0] = 0.136;
+        x[1] = 0.432;
+        x[2] = -0.227;
+        let max_iter = 100;
+        let tol = 1.0e-6;
+        let solution = sparse.solve_bicg( b, x, max_iter, tol);
+        assert!( (solution[0] - 6.0/44.0).abs() < tol );
+        assert!( (solution[1] - 19.0/44.0).abs() < tol );
+        assert!( (solution[2] + 10.0/44.0).abs() < tol );
+    }
+
+    #[test]
+    fn test_sparse_solve_bicgstab() {
         let mut triplets = Vector::<Tr64>::empty();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );

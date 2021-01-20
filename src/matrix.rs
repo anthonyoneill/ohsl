@@ -1072,8 +1072,95 @@ impl<T: Clone + Number> Sparse<T> {
 }
 
 impl Sparse<f64> {
-    /// Solve the system of equations Ax=b using the stabilised biconjugate
-    /// gradient method BiCGSTAB
+
+    /// Identity precondtioner 
+    #[inline]
+    fn identity_preconditioner( b: &Vec64 ) -> Vec64 {
+        b.clone() 
+    }
+
+    //TODO more preconditioners
+
+    /*// Diagonal preconditioner 
+    #[inline]
+    fn diagonal_preconditioner( &self, b: &Vec64 ) -> Vec64 {
+        let mut x = Vec64::zeros( b.size() );
+        let col_index = self.col_index();
+        for i in 0..self.rows {
+            for k in 0..self.val.size() {
+                if self.row_index[ k ] == i && col_index[ k ] == i {
+                    x[ i ] = b[ i ] / self.val[ k ];
+                } else {
+                    x[ i ] = b[ i ];
+                }
+            }
+        }
+        x
+    }*/
+
+    /// Solve the system of equations Ax=b using the biconjugate gradient method
+    #[inline]
+    pub fn solve_bicg(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> Vec64 {
+        if self.rows != b.size() { panic!( "solve_bicg error: rows != b.size()." ); }
+        if self.rows != self.cols() { panic!( "solve_bicg error: matrix is not square." ); }
+        if b.size() != guess.size() { panic!( "solve_bicg error: b.size() != guess.size()." ); }
+        
+        let mut x    = guess.clone();
+        let mut p    = Vec64::zeros( self.rows );
+        let mut pp    = Vec64::zeros( self.rows );
+        let mut rho_2 = 1.0;
+        let normb = b.norm_2();
+        let mut r = self.multiply( &x );
+        r = b - r;
+        let mut rr = r.clone();
+
+        // Identity preconditioner
+        let mut z = Sparse::<f64>::identity_preconditioner( &r );
+        // Diagonal preconditioner
+        //let mut z = self.diagonal_preconditioner( &r );
+
+        let mut iter: usize = 0;
+        while iter < max_iter {
+            iter += 1;
+
+            // Identity preconditioner
+            let mut zz = Sparse::<f64>::identity_preconditioner( &rr );
+            // Diagonal preconditioner
+            //let mut zz = self.diagonal_preconditioner( &rr );
+
+            let rho_1 = z.dot( rr.clone() );
+            if iter == 1 {
+                p = z.clone();
+                pp = zz;
+            } else {
+                let beta = rho_1 / rho_2;
+                p = beta * p + z.clone();
+                pp = beta * pp + zz; 
+            }
+
+            z = self.multiply( &p );
+            let alpha = rho_1 / z.dot( pp.clone() );
+            zz = self.transpose_multiply( &pp );
+            x += alpha * p.clone();
+            r -= alpha * z.clone();
+            rr -= alpha * zz.clone();
+
+            // Identity preconditioner
+            z = Sparse::<f64>::identity_preconditioner( &r );
+            // Diagonal preconditioner
+            //z = self.diagonal_preconditioner( &r );
+
+            rho_2 = rho_1;
+
+            let err = r.norm_2() / normb;
+            if err <= tol {
+                return x;
+            }
+        }
+        panic!( "solve_bicg error: non-convergence error code 1." );
+    }
+
+    /// Solve the system of equations Ax=b using the stabilised biconjugate gradient method
     #[inline]
     pub fn solve_bicgstab(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> Vec64 {
         if self.rows != b.size() { panic!( "solve_bicgstab error: rows != b.size()" ); }
