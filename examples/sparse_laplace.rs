@@ -85,13 +85,12 @@ fn main() {
     let guess = Vec64::random( size );
     let max_iter = 1000;
     let tol = 1.0e-8;
-    let (u, iter) = sparse.solve_bicg( rhs, guess, max_iter, tol);
+    let u = sparse.solve_bicg( rhs, guess, max_iter, tol);
 
     // Output time and error
     let duration = start.elapsed();
     println!("  * Time elapsed is: {:?}", duration);
     let u_diff = u - u_exact;
     println!("  * Solution error = {}", u_diff.norm_2() );
-    println!("  * iter = {}", iter );
     println!( "-------------------- FINISHED ---------------------" );
 }

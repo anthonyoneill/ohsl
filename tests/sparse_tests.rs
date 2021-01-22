@@ -123,11 +123,10 @@ use ohsl::vector::{Vec64};
         x[2] = -0.227;
         let max_iter = 100;
         let tol = 1.0e-6;
-        let (solution, iter) = sparse.solve_bicg( b, x, max_iter, tol);
+        let solution = sparse.solve_bicg( b, x, max_iter, tol);
         assert!( (solution[0] - 6.0/44.0).abs() < tol );
         assert!( (solution[1] - 19.0/44.0).abs() < tol );
         assert!( (solution[2] + 10.0/44.0).abs() < tol );
-        assert!( iter < max_iter );
     }
 
     #[test]

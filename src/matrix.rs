@@ -1095,7 +1095,7 @@ impl Sparse<f64> {
 
     /// Solve the system of equations Ax=b using the biconjugate gradient method
     #[inline]
-    pub fn solve_bicg(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> (Vec64, usize) {
+    pub fn solve_bicg(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> Vec64 {
         if self.rows != b.size() { panic!( "solve_bicg error: rows != b.size()." ); }
         if self.rows != self.cols() { panic!( "solve_bicg error: matrix is not square." ); }
         if b.size() != guess.size() { panic!( "solve_bicg error: b.size() != guess.size()." ); }
@@ -1142,7 +1142,7 @@ impl Sparse<f64> {
 
             let err = r.norm_2() / normb;
             if err <= tol {
-                return (x, iter);
+                return x;
             }
         }
         panic!( "solve_bicg error: non-convergence error code 1." );
