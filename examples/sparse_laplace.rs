@@ -13,13 +13,12 @@ fn main() {
     println!( "  * to the given boundary conditions. The exact solution");
     println!( "  * is u(x,y) = y/[(1+x)^2 + y^2].");
     let start = Instant::now();
-    let n: usize = 32;                          // Number of intervals
+    let n: usize = 64;                          // Number of intervals
     let dx: f64 = 1.0 / ( n as f64 );           // Step size
     let size: usize = ( n + 1 ) * ( n + 1 );    // Size of the linear system
     let mut rhs = Vec64::zeros( size );         // Right hand side vector 
 
-    let mut triplets = Vector::<Tr64>::empty();
-
+    let mut triplets = Vec::new();
     let mut row: usize = 0;
     
     // x = 0 boundary ( u = y / ( 1 + y^2 ) )
@@ -75,20 +74,24 @@ fn main() {
             row += 1;
         }
     }
-
+    let duration = start.elapsed();
+    println!("  * Time elapsed is: {:?}", duration);
     // Create the sparse matrix from the triplets
     let sparse = Sparse::<f64>::new( size, size, &mut triplets );
+    let duration = start.elapsed();
+    println!("  * Time elapsed is: {:?}", duration);
 
     // Solve using the Biconjugate gradient method
     let guess = Vec64::random( size );
     let max_iter = 1000;
     let tol = 1.0e-8;
-    let u = sparse.solve_bicg( rhs, guess, max_iter, tol);
+    let (u, iter) = sparse.solve_bicg( rhs, guess, max_iter, tol);
 
     // Output time and error
     let duration = start.elapsed();
     println!("  * Time elapsed is: {:?}", duration);
     let u_diff = u - u_exact;
     println!("  * Solution error = {}", u_diff.norm_2() );
+    println!("  * iter = {}", iter );
     println!( "-------------------- FINISHED ---------------------" );
 }

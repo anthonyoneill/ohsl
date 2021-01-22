@@ -463,6 +463,17 @@ impl Vector<f64> {
         }
         Vector{ vec, size }
     }
+
+    /// Return the dot product of two vectors v.dot(w)
+    #[inline]
+    pub fn dotf64(&self, w: &Vector<f64>) -> f64 {
+        if self.size != w.size { panic!( "Vector sizes do not agree dot()." ); }
+        let mut result = 0.0;
+        for i in 0..self.size {
+            result += self.vec[i] * w.vec[i];
+        }
+        result
+    }
 }
 
 impl<T> fmt::Debug for Vector<T> where

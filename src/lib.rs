@@ -36,7 +36,7 @@ mod tests {
     pub use crate::matrix::{Matrix, Mat64, Sparse, Sparse64, Triplet, Tr64};
     //pub use crate::mesh1d::Mesh1D;
     //pub use crate::newton::Newton;
-    pub use crate::mesh2d::Mesh2D;
+    //pub use crate::mesh2d::Mesh2D;
 
     #[test]
     fn test_example() {

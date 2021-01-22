@@ -10,7 +10,7 @@ fn main() {
     println!( "  * Solving the linear system Ax = b, for x, where" );
     let n: usize = 4;
     let mut a = Mat64::new( n, n, 0.0 );
-    let mut triplets = Vector::<Tr64>::empty();
+    let mut triplets = Vec::new();
     for i in 0..n {
         a[i][i] = 2.0;
         triplets.push( Tr64::new( i, i, 2.0 ) );

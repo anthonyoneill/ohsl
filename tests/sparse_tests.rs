@@ -1,5 +1,5 @@
 use ohsl::matrix::{Sparse, Sparse64, Triplet, Tr64};
-use ohsl::vector::{Vector, Vec64};
+use ohsl::vector::{Vec64};
 
 #[test]
     fn test_sparse_unspecified_size() {
@@ -19,13 +19,13 @@ use ohsl::vector::{Vector, Vec64};
         assert_eq!( trip2.row(), 1 );
         assert_eq!( trip2.col(), 2 );
         assert_eq!( trip2.val(), 1.0 );
-        assert!( trip.compare( trip2.clone() ));
-        assert!( !trip2.compare( trip ));
+        assert!( trip.compare( &trip2 ));
+        assert!( !trip2.compare( &trip ));
     }
 
     #[test]
     fn test_sparse_triplet() {
-        let mut triplets = Vector::<Tr64>::empty();
+        let mut triplets = Vec::new();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );
         triplets.push( Tr64::new( 1, 0, 3.0 ) );
@@ -62,7 +62,7 @@ use ohsl::vector::{Vector, Vec64};
 
     #[test]
     fn test_sparse_scale() {
-        let mut triplets = Vector::<Tr64>::empty();
+        let mut triplets = Vec::new();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );
         triplets.push( Tr64::new( 1, 0, 3.0 ) );
@@ -84,7 +84,7 @@ use ohsl::vector::{Vector, Vec64};
 
     #[test]
     fn test_sparse_vector_mult() {
-        let mut triplets = Vector::<Tr64>::empty();
+        let mut triplets = Vec::new();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );
         triplets.push( Tr64::new( 1, 0, 3.0 ) );
@@ -106,7 +106,7 @@ use ohsl::vector::{Vector, Vec64};
 
     #[test]
     fn test_sparse_solve_bicg() {
-        let mut triplets = Vector::<Tr64>::empty();
+        let mut triplets = Vec::new();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );
         triplets.push( Tr64::new( 1, 0, 3.0 ) );
@@ -123,15 +123,16 @@ use ohsl::vector::{Vector, Vec64};
         x[2] = -0.227;
         let max_iter = 100;
         let tol = 1.0e-6;
-        let solution = sparse.solve_bicg( b, x, max_iter, tol);
+        let (solution, iter) = sparse.solve_bicg( b, x, max_iter, tol);
         assert!( (solution[0] - 6.0/44.0).abs() < tol );
         assert!( (solution[1] - 19.0/44.0).abs() < tol );
         assert!( (solution[2] + 10.0/44.0).abs() < tol );
+        assert!( iter < max_iter );
     }
 
     #[test]
     fn test_sparse_solve_bicgstab() {
-        let mut triplets = Vector::<Tr64>::empty();
+        let mut triplets = Vec::new();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );
         triplets.push( Tr64::new( 1, 0, 3.0 ) );
@@ -156,7 +157,7 @@ use ohsl::vector::{Vector, Vec64};
 
     #[test]
     fn test_sparse_insert() {
-        let mut triplets = Vector::<Tr64>::empty();
+        let mut triplets = Vec::new();
         triplets.push( Tr64::new( 0, 0, 1.0 ) );
         triplets.push( Tr64::new( 0, 1, 2.0 ) );
         triplets.push( Tr64::new( 1, 0, 3.0 ) );

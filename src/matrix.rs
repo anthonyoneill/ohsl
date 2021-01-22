@@ -796,7 +796,7 @@ impl<T: Clone + Number> Triplet<T> {
 
     /// Compare indices for column major sorting
     #[inline]
-    pub fn compare(&self, other: Triplet<T> ) -> bool {
+    pub fn compare(&self, other: &Triplet<T> ) -> bool {
         let mut result: bool = false;
         if self.col < other.col { result = true; }
         if self.col == other.col {
@@ -816,37 +816,6 @@ impl<T: Clone> Clone for Triplet<T> {
         Triplet { row, col, val }
     }
 }
-
-/*impl<T: Clone + Number> PartialEq for Triplet<T> {
-    /// Implement trait for partial equality 
-    fn eq(&self, other: &Triplet<T>) -> bool {
-        self.row == other.row && self.col == other.col && self.val == other.val
-    }
-}
-
-impl<T: Clone + Number> Eq for Triplet<T> {}*/
-
-/*impl<T: Clone + Number + std::cmp::Ord> Ord for Triplet<T> {
-    /// Implement trait for ordering (column-major)
-    fn cmp(&self, other: &Triplet<T>) -> Ordering {
-        if self.col != other.col {
-            self.col.cmp( &other.col )
-        } else {
-            self.row.cmp( &other.row )
-        }
-    }
-}*/
-
-/*impl<T: Clone + Number + std::cmp::PartialOrd> PartialOrd for Triplet<T> {
-    /// Implement trait for partial ordering (column-major)
-    fn partial_cmp(&self, other: &Triplet<T>) -> Option<Ordering> {
-        if self.col != other.col {
-            self.col.partial_cmp( &other.col )
-        } else {
-            self.row.partial_cmp( &other.row )
-        }
-    }
-}*/
 
 pub struct Sparse<T> {
     rows: usize,                    // Number of rows
@@ -870,9 +839,10 @@ impl<T: Clone + Number> Sparse<T> {
 
     /// Create a new sparse matrix from a Vector of Triplets
     #[inline]
-    pub fn new( rows: usize, cols: usize, mut triplets: &mut Vector<Triplet<T>> ) -> Self {
-        let n = triplets.size();
-        Sparse::<T>::quick_sort( &mut triplets, 0, n - 1 );
+    //pub fn new( rows: usize, cols: usize, mut triplets: &mut Vector<Triplet<T>> ) -> Self {
+    pub fn new( rows: usize, cols: usize, mut triplets: &mut [Triplet<T>] ) -> Self {
+        let n = triplets.len();
+        Sparse::<T>::merge_sort( &mut triplets );
         let mut val = Vector::<T>::empty();
         let mut row_index = Vector::<usize>::empty();
         let mut col_index = Vector::<usize>::empty();
@@ -945,36 +915,36 @@ impl<T: Clone + Number> Sparse<T> {
         col_start
     }
 
-    // Sort the Vector of Triplets using the quick-sort algorithm
+    // Sort the Vector of Triplets using the merge-sort algorithm 
     #[inline]
-    fn quick_sort( triplets: &mut Vector<Triplet<T>>, start: usize, end: usize ) {
-        if start >= end {
-            return;
-        }
-        let pivot = Sparse::<T>::partition( triplets, start, end );
+    fn merge_sort( triplets: &mut [Triplet<T>] ) {
+        if triplets.len() < 2 { return; }
 
-        Sparse::<T>::quick_sort( triplets, start, (pivot - 1) as usize);
-        Sparse::<T>::quick_sort( triplets, (pivot + 1) as usize, end);
-    }
+        let len = triplets.len();
+        let mid = len / 2;
+        Sparse::<T>::merge_sort( &mut triplets[0..mid] );
+        Sparse::<T>::merge_sort( &mut triplets[mid..]);
 
-    // Partition function for use in quick_sort
-    #[inline]
-    fn partition( triplets: &mut Vector<Triplet<T>>, start: usize, end: usize ) -> usize {
-        let pivot = triplets[ end ].clone();
-        let mut index = start;
+        let mut tmp = Vec::<Triplet<T>>::with_capacity( len );
+        let mut i = 0;
+        let mut j = mid;
 
-        let mut i = start;
-        while i < end {
-            if triplets[i].compare( pivot.clone() ) {
-                triplets.swap( i, index );
-                index += 1;
+        while i < mid && j < len {
+            if triplets[i].compare( &triplets[j] ) {
+                tmp.push( triplets[i].clone() );
+                i += 1;
+            } else {
+                tmp.push( triplets[j].clone() );
+                j += 1;
             }
-            i += 1;
         }
-        triplets.swap( index, end );
-        index
+        if i < mid {
+            tmp.extend_from_slice( &triplets[i..mid] );
+        } else if j < len {
+            tmp.extend_from_slice( &triplets[j..len] );
+        }
+        triplets.clone_from_slice( &tmp[..] );
     }
-
 
     /// Scale the Sparse matrix by a constant factor
     #[inline]
@@ -1066,8 +1036,7 @@ impl<T: Clone + Number> Sparse<T> {
         self.col_start = Sparse::<T>::col_start_from_index( self.cols, self.val.size(), col_index );
     }
 
-    //TODO transpose, get, other solve methods?
-
+    //TODO transpose, get + other solve methods
     
 }
 
@@ -1098,9 +1067,35 @@ impl Sparse<f64> {
         x
     }*/
 
+    /*// Multiply the Sparse matrix by a Vector to the right 
+    #[inline]
+    pub fn multiplyf64(&self, x: &Vec64 ) -> Vec64 {
+        if x.size() != self.cols { panic!( "Matrix dimensions do not agree in multiply." ); }
+        let mut y = Vec64::zeros( self.rows );
+        for j in 0..self.cols {
+            for i in self.col_start[j]..self.col_start[ j + 1 ] {
+                y[ self.row_index[ i ] ] += self.val[ i ] * x[ j ];
+            }
+        }
+        y
+    }
+
+    /// Multiply the transpose of the Sparse matrix by a Vector to the right 
+    #[inline]
+    pub fn transpose_multiplyf64(&self, x: &Vec64 ) -> Vec64 {
+        if x.size() != self.rows { panic!( "Matrix dimensions do not agree in transpose_multiply." ); }
+        let mut y = Vec64::zeros( self.cols );
+        for i in 0..self.cols {
+            for j in self.col_start[ i ]..self.col_start[ i + 1 ] {
+                y[ i ] += self.val[ j ] * x[ self.row_index[ j ] ];
+            }
+        }
+        y
+    }*/
+
     /// Solve the system of equations Ax=b using the biconjugate gradient method
     #[inline]
-    pub fn solve_bicg(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> Vec64 {
+    pub fn solve_bicg(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> (Vec64, usize) {
         if self.rows != b.size() { panic!( "solve_bicg error: rows != b.size()." ); }
         if self.rows != self.cols() { panic!( "solve_bicg error: matrix is not square." ); }
         if b.size() != guess.size() { panic!( "solve_bicg error: b.size() != guess.size()." ); }
@@ -1122,12 +1117,8 @@ impl Sparse<f64> {
         let mut iter: usize = 0;
         while iter < max_iter {
             iter += 1;
-
             // Identity preconditioner
             let mut zz = Sparse::<f64>::identity_preconditioner( &rr );
-            // Diagonal preconditioner
-            //let mut zz = self.diagonal_preconditioner( &rr );
-
             let rho_1 = z.dot( rr.clone() );
             if iter == 1 {
                 p = z.clone();
@@ -1147,14 +1138,11 @@ impl Sparse<f64> {
 
             // Identity preconditioner
             z = Sparse::<f64>::identity_preconditioner( &r );
-            // Diagonal preconditioner
-            //z = self.diagonal_preconditioner( &r );
-
             rho_2 = rho_1;
 
             let err = r.norm_2() / normb;
             if err <= tol {
-                return x;
+                return (x, iter);
             }
         }
         panic!( "solve_bicg error: non-convergence error code 1." );

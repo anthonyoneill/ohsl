@@ -120,6 +120,10 @@ fn test_dot_product() {
     let v = Vector::<u32>::create( vec![ 4, 5, 6 ] );
     let dot = u.dot( v );
     assert_eq!( dot, 32 );
+    let u = Vec64::create( vec![ 1.0, 2.0, 3.0 ] );
+    let v = Vec64::create( vec![ 4.0, 5.0, 6.0 ] );
+    let dotf64 = u.dotf64( &v );
+    assert_eq!( dotf64, 32.0 );
 }
 
 #[test]
