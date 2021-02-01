@@ -6,6 +6,8 @@ pub use crate::traits::{Number, Signed, Zero, One};
 pub use crate::complex::Complex;
 pub use crate::vector::{Vector, Vec64};
 
+//use std::time::{Instant};
+
 pub struct Matrix<T> {
     mat: Vec< Vector<T> >,
     rows: usize,
@@ -1050,52 +1052,34 @@ impl Sparse<f64> {
 
     //TODO more preconditioners
 
-    /*// Diagonal preconditioner 
+    /*/ Diagonal preconditioner 
     #[inline]
     fn diagonal_preconditioner( &self, b: &Vec64 ) -> Vec64 {
         let mut x = Vec64::zeros( b.size() );
         let col_index = self.col_index();
-        for i in 0..self.rows {
-            for k in 0..self.val.size() {
-                if self.row_index[ k ] == i && col_index[ k ] == i {
-                    x[ i ] = b[ i ] / self.val[ k ];
-                } else {
-                    x[ i ] = b[ i ];
+        for i in 0..b.size() {
+            let mut diag = 0.0;
+            for j in col_index[i]..col_index[i+1] {
+                if self.row_index[j] == i {
+                    diag = self.val[j];
+                    break; 
                 }
+            }
+            if diag != 0.0 {
+                x[i] = b[i] / diag;
+            } else {
+                x[i] = b[i];
             }
         }
         x
     }*/
 
-    /*// Multiply the Sparse matrix by a Vector to the right 
-    #[inline]
-    pub fn multiplyf64(&self, x: &Vec64 ) -> Vec64 {
-        if x.size() != self.cols { panic!( "Matrix dimensions do not agree in multiply." ); }
-        let mut y = Vec64::zeros( self.rows );
-        for j in 0..self.cols {
-            for i in self.col_start[j]..self.col_start[ j + 1 ] {
-                y[ self.row_index[ i ] ] += self.val[ i ] * x[ j ];
-            }
-        }
-        y
-    }
-
-    /// Multiply the transpose of the Sparse matrix by a Vector to the right 
-    #[inline]
-    pub fn transpose_multiplyf64(&self, x: &Vec64 ) -> Vec64 {
-        if x.size() != self.rows { panic!( "Matrix dimensions do not agree in transpose_multiply." ); }
-        let mut y = Vec64::zeros( self.cols );
-        for i in 0..self.cols {
-            for j in self.col_start[ i ]..self.col_start[ i + 1 ] {
-                y[ i ] += self.val[ j ] * x[ self.row_index[ j ] ];
-            }
-        }
-        y
-    }*/
-
     /// Solve the system of equations Ax=b using the biconjugate gradient method
     #[inline]
     pub fn solve_bicg(&self, b: Vec64, guess: Vec64, max_iter: usize, tol: f64 ) -> Vec64 {
+
+        //let start = Instant::now();
+
         if self.rows != b.size() { panic!( "solve_bicg error: rows != b.size()." ); }
         if self.rows != self.cols() { panic!( "solve_bicg error: matrix is not square." ); }
         if b.size() != guess.size() { panic!( "solve_bicg error: b.size() != guess.size()." ); }
@@ -1119,6 +1103,8 @@ impl Sparse<f64> {
             iter += 1;
             // Identity preconditioner
             let mut zz = Sparse::<f64>::identity_preconditioner( &rr );
+            // Diagonal preconditioner
+            //let mut zz = self.diagonal_preconditioner( &rr );
             let rho_1 = z.dot( rr.clone() );
             if iter == 1 {
                 p = z.clone();
@@ -1138,7 +1124,12 @@ impl Sparse<f64> {
 
             // Identity preconditioner
             z = Sparse::<f64>::identity_preconditioner( &r );
+            // Diagonal preconditioner
+            //z = self.diagonal_preconditioner( &r );
             rho_2 = rho_1;
+
+            //let duration = start.elapsed();
+            //println!("  * bicg iter {} time elapsed is: {:?}", iter, duration);
 
             let err = r.norm_2() / normb;
             if err <= tol {
@@ -1187,7 +1178,8 @@ impl Sparse<f64> {
                 p = r.clone() + beta * temp;
             }
             //TODO phat preconditioner (identity at the moment)
-            let phat = p.clone();
+            //let phat = p.clone();
+            let phat = Sparse::<f64>::identity_preconditioner( &p );
             v = self.multiply( &phat );
             alpha = rho_1 / rtilde.dot( v.clone() );
             let s = r.clone() - alpha * v.clone();
@@ -1197,7 +1189,8 @@ impl Sparse<f64> {
                 return x;
             }
             //TODO shat preconditioner (identity at the moment)
-            let shat = s.clone();
+            //let shat = s.clone();
+            let shat = Sparse::<f64>::identity_preconditioner( &s );
             let t = self.multiply( &shat ); 
             omega = t.dot( s.clone() ) / t.dot( t.clone() );
             x += alpha * phat;

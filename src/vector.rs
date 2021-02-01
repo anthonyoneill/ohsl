@@ -7,7 +7,7 @@ pub use crate::traits::{Number, Signed, Zero, One};
 pub use crate::complex::Complex;
 
 pub struct Vector<T> {
-    vec: Vec<T>,
+    pub vec: Vec<T>,
     size: usize,
 }
 

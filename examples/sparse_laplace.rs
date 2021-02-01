@@ -13,7 +13,7 @@ fn main() {
     println!( "  * to the given boundary conditions. The exact solution");
     println!( "  * is u(x,y) = y/[(1+x)^2 + y^2].");
     let start = Instant::now();
-    let n: usize = 64;                          // Number of intervals
+    let n: usize = 128;                          // Number of intervals
     let dx: f64 = 1.0 / ( n as f64 );           // Step size
     let size: usize = ( n + 1 ) * ( n + 1 );    // Size of the linear system
     let mut rhs = Vec64::zeros( size );         // Right hand side vector 
