@@ -1,6 +1,6 @@
 [package]
 name = "ohsl"
-version = "0.7.4"
+version = "0.7.5"
 authors = ["anthonyoneill <ajoneill@protonmail.com>"]
 edition = "2018"
 description = "A collection of numerical routines and mathematical types for use in scientific computing."
@@ -13,3 +13,4 @@ readme = "README.md"
 [dependencies]
 libm = "0.2.1"
 rand = "0.8.2"
+more-asserts = "0.2.1"

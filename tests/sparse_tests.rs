@@ -1,187 +1,85 @@
-use ohsl::matrix::{Sparse, Sparse64, Triplet, Tr64};
+use ohsl::matrix::{Sparse, MatrixState, Axis};
 use ohsl::vector::{Vec64};
 
 #[test]
-    fn test_sparse_unspecified_size() {
-        let s = Sparse::<i32>::empty( 10, 10 );
-        assert_eq!( s.rows(), 10 );
-        assert_eq!( s.cols(), 10 );
-        assert_eq!( s.nonzero(), 0 );
-    }
+fn test_sparse_create_matrix() {
+    let m = Sparse::new();
+    assert_eq!(m.state(), MatrixState::CREATED);
+    assert_eq!(m.diag(), vec![]);
+}
 
-    #[test]
-    fn test_triplet() {
-        let trip = Triplet::<f64>::empty();
-        assert_eq!( trip.row(), 0 );
-        assert_eq!( trip.col(), 0 );
-        assert_eq!( trip.val(), 0.0 );
-        let trip2 = Triplet::<f64>::new( 1, 2, 1.0 );
-        assert_eq!( trip2.row(), 1 );
-        assert_eq!( trip2.col(), 2 );
-        assert_eq!( trip2.val(), 1.0 );
-        assert!( trip.compare( &trip2 ));
-        assert!( !trip2.compare( &trip ));
-    }
+#[test]
+fn test_sparse_add_element() {
+    let mut s = Sparse::new();
 
-    #[test]
-    fn test_sparse_triplet() {
-        let mut triplets = Vec::new();
-        triplets.push( Tr64::new( 0, 0, 1.0 ) );
-        triplets.push( Tr64::new( 0, 1, 2.0 ) );
-        triplets.push( Tr64::new( 1, 0, 3.0 ) );
-        triplets.push( Tr64::new( 1, 1, 4.0 ) );
-        triplets.push( Tr64::new( 1, 2, 5.0 ) );
-        triplets.push( Tr64::new( 2, 1, 6.0 ) );
-        triplets.push( Tr64::new( 2, 2, 7.0 ) );
-        let sparse = Sparse::<f64>::new( 3, 3, &mut triplets );
-        assert_eq!( sparse.rows(), 3 ); 
-        assert_eq!( sparse.cols(), 3 ); 
-        assert_eq!( sparse.nonzero(), 7 ); 
-        let values = sparse.val();
-        assert_eq!( values[0], 1.0 );
-        assert_eq!( values[1], 3.0 );
-        assert_eq!( values[2], 2.0 );
-        assert_eq!( values[3], 4.0 );
-        assert_eq!( values[4], 6.0 );
-        assert_eq!( values[5], 5.0 );
-        assert_eq!( values[6], 7.0 );
-        let index = sparse.row_index();
-        assert_eq!( index[0], 0 );
-        assert_eq!( index[1], 1 );
-        assert_eq!( index[2], 0 );
-        assert_eq!( index[3], 1 );
-        assert_eq!( index[4], 2 );
-        assert_eq!( index[5], 1 );
-        assert_eq!( index[6], 2 );
-        let start = sparse.col_start();
-        assert_eq!( start[0], 0 );
-        assert_eq!( start[1], 2 );
-        assert_eq!( start[2], 5 );
-        assert_eq!( start[3], 7 );
-    }
+    s.add_element(0, 0, 1.0);
+    assert_eq!(s.num_rows(), 1);
+    assert_eq!(s.num_cols(), 1);
+    assert_eq!(s.size(), (1, 1));
+    assert_eq!(s.diag().len(), 1);
 
-    #[test]
-    fn test_sparse_scale() {
-        let mut triplets = Vec::new();
-        triplets.push( Tr64::new( 0, 0, 1.0 ) );
-        triplets.push( Tr64::new( 0, 1, 2.0 ) );
-        triplets.push( Tr64::new( 1, 0, 3.0 ) );
-        triplets.push( Tr64::new( 1, 1, 4.0 ) );
-        triplets.push( Tr64::new( 1, 2, 5.0 ) );
-        triplets.push( Tr64::new( 2, 1, 6.0 ) );
-        triplets.push( Tr64::new( 2, 2, 7.0 ) );
-        let mut sparse = Sparse::<f64>::new( 3, 3, &mut triplets );
-        sparse.scale( 2.0 );
-        let values = sparse.val();
-        assert_eq!( values[0], 2.0 );
-        assert_eq!( values[1], 6.0 );
-        assert_eq!( values[2], 4.0 );
-        assert_eq!( values[3], 8.0 );
-        assert_eq!( values[4], 12.0 );
-        assert_eq!( values[5], 10.0 );
-        assert_eq!( values[6], 14.0 );
-    }
+    s.add_element(100, 100, 1.0);
+    assert_eq!(s.num_rows(), 101);
+    assert_eq!(s.num_cols(), 101);
+    assert_eq!(s.size(), (101, 101));
+    assert_eq!(s.diag().len(), 101);
+}
 
-    #[test]
-    fn test_sparse_vector_mult() {
-        let mut triplets = Vec::new();
-        triplets.push( Tr64::new( 0, 0, 1.0 ) );
-        triplets.push( Tr64::new( 0, 1, 2.0 ) );
-        triplets.push( Tr64::new( 1, 0, 3.0 ) );
-        triplets.push( Tr64::new( 1, 1, 4.0 ) );
-        triplets.push( Tr64::new( 1, 2, 5.0 ) );
-        triplets.push( Tr64::new( 2, 1, 6.0 ) );
-        triplets.push( Tr64::new( 2, 2, 7.0 ) );
-        let sparse = Sparse::<f64>::new( 3, 3, &mut triplets );
-        let v = Vec64::new( 3, 1.0 );
-        let mul = sparse.multiply( &v );
-        assert_eq!( mul[0], 3.0 );
-        assert_eq!( mul[1], 12.0 );
-        assert_eq!( mul[2], 13.0 );
-        let trans_mul = sparse.transpose_multiply( &v );
-        assert_eq!( trans_mul[0], 4.0 );
-        assert_eq!( trans_mul[1], 12.0 );
-        assert_eq!( trans_mul[2], 12.0 );
-    }
+#[test]
+fn test_sparse_get() {
+    let mut s = Sparse::new();
+    s.add_element(0, 0, 1.0);
+    assert_eq!( s.get(0, 0).unwrap(), 1.0 );
+}
 
-    #[test]
-    fn test_sparse_solve_bicg() {
-        let mut triplets = Vec::new();
-        triplets.push( Tr64::new( 0, 0, 1.0 ) );
-        triplets.push( Tr64::new( 0, 1, 2.0 ) );
-        triplets.push( Tr64::new( 1, 0, 3.0 ) );
-        triplets.push( Tr64::new( 1, 1, 4.0 ) );
-        triplets.push( Tr64::new( 1, 2, 5.0 ) );
-        triplets.push( Tr64::new( 2, 1, 6.0 ) );
-        triplets.push( Tr64::new( 2, 2, 7.0 ) );
-        let sparse = Sparse::<f64>::new( 3, 3, &mut triplets );
-        let b = Vec64::new( 3, 1.0 );
-        // Set the initial guess
-        let mut x = Vec64::new( 3, 1.0 );
-        x[0] = 0.136;
-        x[1] = 0.432;
-        x[2] = -0.227;
-        let max_iter = 100;
-        let tol = 1.0e-6;
-        let solution = sparse.solve_bicg( b, x, max_iter, tol);
-        assert!( (solution[0] - 6.0/44.0).abs() < tol );
-        assert!( (solution[1] - 19.0/44.0).abs() < tol );
-        assert!( (solution[2] + 10.0/44.0).abs() < tol );
-    }
+#[test]
+fn test_sparse_identity() {
+    // Check identity matrices of each (small) size
+    for k in 1..10 {
+        let ik = Sparse::identity(k);
 
-    #[test]
-    fn test_sparse_solve_bicgstab() {
-        let mut triplets = Vec::new();
-        triplets.push( Tr64::new( 0, 0, 1.0 ) );
-        triplets.push( Tr64::new( 0, 1, 2.0 ) );
-        triplets.push( Tr64::new( 1, 0, 3.0 ) );
-        triplets.push( Tr64::new( 1, 1, 4.0 ) );
-        triplets.push( Tr64::new( 1, 2, 5.0 ) );
-        triplets.push( Tr64::new( 2, 1, 6.0 ) );
-        triplets.push( Tr64::new( 2, 2, 7.0 ) );
-        let sparse = Sparse::<f64>::new( 3, 3, &mut triplets );
-        let b = Vec64::new( 3, 1.0 );
-        // Set the initial guess
-        let mut x = Vec64::new( 3, 1.0 );
-        x[0] = 0.136;
-        x[1] = 0.432;
-        x[2] = -0.227;
-        let max_iter = 100;
-        let tol = 1.0e-6;
-        let solution = sparse.solve_bicgstab( b, x, max_iter, tol);
-        assert!( (solution[0] - 6.0/44.0).abs() < tol );
-        assert!( (solution[1] - 19.0/44.0).abs() < tol );
-        assert!( (solution[2] + 10.0/44.0).abs() < tol );
-    }
+        // Basic size checks
+        assert_eq!(ik.num_rows(), k);
+        assert_eq!(ik.num_cols(), k);
+        assert_eq!(ik.size(), (k, k));
+        assert_eq!(ik.elements().len(), k);
 
-    #[test]
-    fn test_sparse_insert() {
-        let mut triplets = Vec::new();
-        triplets.push( Tr64::new( 0, 0, 1.0 ) );
-        triplets.push( Tr64::new( 0, 1, 2.0 ) );
-        triplets.push( Tr64::new( 1, 0, 3.0 ) );
-        triplets.push( Tr64::new( 1, 1, 4.0 ) );
-        triplets.push( Tr64::new( 1, 2, 5.0 ) );
-        triplets.push( Tr64::new( 2, 1, 6.0 ) );
-        let mut sparse = Sparse64::new( 3, 3, &mut triplets );
-        sparse.insert( 0, 0, 1.0 );
-        sparse.insert( 2, 2, 7.0 );
-        let col_index = sparse.col_index();
-        assert_eq!( col_index[0], 0 );
-        assert_eq!( col_index[1], 0 );
-        assert_eq!( col_index[2], 1 );
-        assert_eq!( sparse.val()[4], 6.0 );
-        assert_eq!( sparse.val()[5], 5.0 );
-        assert_eq!( sparse.val()[6], 7.0 );
-        let b = Vec64::new( 3, 1.0 );
-        let mut x = Vec64::new( 3, 1.0 );
-        x[0] = 0.136;
-        x[1] = 0.432;
-        x[2] = -0.227;
-        let max_iter = 100;
-        let tol = 1.0e-6;
-        let solution = sparse.solve_bicgstab( b, x, max_iter, tol);
-        assert!( (solution[0] - 6.0/44.0).abs() < tol );
-        assert!( (solution[1] - 19.0/44.0).abs() < tol );
-        assert!( (solution[2] + 10.0/44.0).abs() < tol );
+        for v in 0..k {
+            // Check each row/ col head is the same element, and this element is on the diagonal
+            let ro = ik.hdr(Axis::ROWS, v).unwrap();
+            let co = ik.hdr(Axis::COLS, v).unwrap();
+            let d0 = ik.get(v, v).unwrap();
+            assert_eq!(ro, co);
+            assert_eq!(ik[ro].val(), d0);
+            assert_eq!(ik[co].val(), d0);
+        }
     }
+}
+
+#[test]
+fn test_sparse_solve() {
+    let mut s = Sparse::from_triplets(vec![
+        (0, 0, 1.0),
+        (0, 1, 2.0),
+        (1, 0, 3.0),
+        (1, 1, 4.0),
+        (1, 2, 5.0),
+        (2, 1, 6.0),
+        (2, 2, 7.0),
+    ]);
+
+    // ohsl Vector solve
+    let b = Vec64::new( 3, 1.0 );
+    let solution = s.solve( b ).unwrap();
+    assert_eq!( solution[0], 6.0/44.0 );
+    assert_eq!( solution[1], 19.0/44.0 );
+    assert_eq!( solution[2], -10.0/44.0 );
+    
+    // std Vec _solve
+    let rhs = vec![1.0, 1.0, 1.0];
+    let soln = s._solve(rhs).unwrap();
+    let correct = vec![6.0/44.0, 19.0/44.0, -10.0/44.0];
+    for k in 0..soln.len() {
+        assert_eq!( soln[k], correct[k] );
+    }
+}
