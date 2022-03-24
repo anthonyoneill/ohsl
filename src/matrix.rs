@@ -813,7 +813,7 @@ pub struct Element {
     col: usize,
     val: f64,
     fillin: bool,
-    orig: (usize, usize, f64),
+    //orig: (usize, usize, f64),
     next_in_row: Option<Eindex>,
     next_in_col: Option<Eindex>,
 }
@@ -835,7 +835,7 @@ impl Element {
             col,
             val,
             fillin,
-            orig: (row, col, val),
+            //orig: (row, col, val),
             next_in_row: None,
             next_in_col: None,
         }
