@@ -12,5 +12,5 @@ readme = "README.md"
 
 [dependencies]
 libm = "0.2.1"
-rand = "0.8.2"
+rand = "0.8.5"
 more-asserts = "0.2.1"
