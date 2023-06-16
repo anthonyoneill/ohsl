@@ -2,14 +2,14 @@ use ohsl::matrix::{Sparse, MatrixState, Axis};
 use ohsl::vector::{Vec64};
 
 #[test]
-fn test_sparse_create_matrix() {
+fn create_matrix() {
     let m = Sparse::new();
     assert_eq!(m.state(), MatrixState::CREATED);
     assert_eq!(m.diag(), vec![]);
 }
 
 #[test]
-fn test_sparse_add_element() {
+fn add_element() {
     let mut s = Sparse::new();
 
     s.add_element(0, 0, 1.0);
@@ -26,14 +26,14 @@ fn test_sparse_add_element() {
 }
 
 #[test]
-fn test_sparse_get() {
+fn get() {
     let mut s = Sparse::new();
     s.add_element(0, 0, 1.0);
     assert_eq!( s.get(0, 0).unwrap(), 1.0 );
 }
 
 #[test]
-fn test_sparse_identity() {
+fn identity() {
     // Check identity matrices of each (small) size
     for k in 1..10 {
         let ik = Sparse::identity(k);
@@ -57,7 +57,7 @@ fn test_sparse_identity() {
 }
 
 #[test]
-fn test_sparse_solve() {
+fn solve() {
     let mut s = Sparse::from_triplets(vec![
         (0, 0, 1.0),
         (0, 1, 2.0),

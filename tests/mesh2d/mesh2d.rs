@@ -1,7 +1,7 @@
 use ohsl::{ mesh2d::Mesh2D, vector::Vec64};
 
 #[test]
-fn test_mesh2d_construction() {
+fn construction() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -13,7 +13,7 @@ fn test_mesh2d_construction() {
 }
 
 #[test]
-fn test_mesh2d_coord_nodes() {
+fn coord_nodes() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -23,7 +23,7 @@ fn test_mesh2d_coord_nodes() {
 }
 
 #[test]
-fn test_mesh2d_set_nodes_vars() {
+fn set_nodes_vars() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -35,7 +35,7 @@ fn test_mesh2d_set_nodes_vars() {
 }
 
 #[test]
-fn test_mesh2d_get_nodes_vars() {
+fn get_nodes_vars() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -48,7 +48,7 @@ fn test_mesh2d_get_nodes_vars() {
 }
 
 #[test]
-fn test_mesh2d_assign() {
+fn assign() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -64,7 +64,7 @@ fn test_mesh2d_assign() {
 }
 
 #[test]
-fn test_mesh2d_cross_section() {
+fn cross_section() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -83,7 +83,7 @@ fn test_mesh2d_cross_section() {
 }
 
 #[test]
-fn test_mesh2d_var_as_matrix() {
+fn var_as_matrix() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 6 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 6 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
@@ -112,25 +112,25 @@ fn test_mesh2d_output() {
     mesh.output_var( "./output.txt", 0, 5)
 }*/
 
-fn myfunction( x: f64, y: f64 ) -> f64 {
+fn two_x_y( x: f64, y: f64 ) -> f64 {
     2.0 * x * y
 }
 
 #[test]
-fn test_mesh2d_apply() {
+fn apply() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
-    mesh.apply( &myfunction, 0 );
+    mesh.apply( &two_x_y, 0 );
     assert!( ( mesh[(1,1)][0] - 0.02 ).abs() < 1.0e-8 );
 }
 
 #[test]
-fn test_mesh2d_trapezium() {
+fn trapezium() {
     let x_nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let y_nodes = Vec64::linspace( 0.0, 2.0, 21 );
     let mut mesh = Mesh2D::<f64>::new( x_nodes, y_nodes, 3 );
-    mesh.apply( &myfunction, 0 );
+    mesh.apply( &two_x_y, 0 );
     let integral = mesh.trapezium( 0 );
     assert!( ( integral - 2.0 ).abs() < 0.001 );
 }

@@ -1,7 +1,7 @@
 use ohsl::{ mesh1d::Mesh1D, vector::Vec64};
 
 #[test]
-fn test_mesh1d_constructor_indexing() {
+fn constructor_indexing() {
     let nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes, 3 );
     mesh[0][1] = 3.14;
@@ -11,14 +11,14 @@ fn test_mesh1d_constructor_indexing() {
 }
 
 #[test]
-fn test_mesh1d_coord() {
+fn coord() {
     let nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let mesh = Mesh1D::<f64, f64>::new( nodes, 3 );
     assert_eq!( mesh.coord( 1 ), 0.1 );
 }
 
 #[test]
-fn test_mesh1d_set_nodes_vars() {
+fn set_nodes_vars() {
     let nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes, 3 );
     let vec = Vec64::new( 3, 3.14 );
@@ -29,7 +29,7 @@ fn test_mesh1d_set_nodes_vars() {
 }
 
 #[test]
-fn test_mesh1d_get_nodes_vars() {
+fn get_nodes_vars() {
     let nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes, 3 );
     let vec = Vec64::new( 3, 3.14 );
@@ -38,7 +38,7 @@ fn test_mesh1d_get_nodes_vars() {
 }
 
 #[test]
-fn test_mesh1d_get_interpolated_vars() {
+fn get_interpolated_vars() {
     let nodes = Vec64::linspace( 0.0, 1.0, 11 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes.clone(), 1 );
     for i in 0..nodes.size() {
@@ -49,7 +49,7 @@ fn test_mesh1d_get_interpolated_vars() {
 }
 
 /*#[test]
-fn test_mesh1d_output() {
+fn output() {
     let mut nodes = Vec64::empty();
     nodes.linspace( 0.0, 1.0, 11 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes.clone(), 3 );
@@ -63,7 +63,7 @@ fn test_mesh1d_output() {
 }*/
 
 #[test]
-fn test_mesh1d_trapezium() {
+fn trapezium() {
     let nodes = Vec64::linspace( 0.0, 1.0, 21 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes.clone(), 2 );
     for i in 0..nodes.size() {
@@ -76,7 +76,7 @@ fn test_mesh1d_trapezium() {
 }
 
 /*#[test]
-fn test_mesh1d_read() {
+fn read() {
     let nodes = Vec64::empty();
     let mut mesh = Mesh1D::<f64, f64>::new( nodes, 3 );
     mesh.read( "./output.txt" );
