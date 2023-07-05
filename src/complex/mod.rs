@@ -1,3 +1,7 @@
+pub mod elementary;
+pub mod trigonometric;
+pub mod hyperbolic;
+
 use core::ops::{Add, Div, Mul, Neg, Sub};
 use core::ops::{AddAssign, SubAssign, MulAssign, DivAssign};
 use std::{fmt, cmp::Ordering};
