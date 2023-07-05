@@ -1,14 +1,26 @@
 pub use crate::complex::Cmplx;
 
 /// pi
-pub const PI: f64 = 3.14159265358979323846;
+pub const PI: f64 = 3.14159265358979323846264338328;
 /// pi/2 
-pub const PI_2: f64 = 1.57079632679489661923;
-/// Square root of 2
-pub const SQRT2: f64 = 1.41421356237309504880;
+pub const PI_2: f64 = 1.57079632679489661923132169164;
+/// pi/4
+pub const PI_4: f64 = 0.78539816339744830961566084582;
+/// 1/pi
+pub const FRAC_1_PI: f64 = 0.31830988618379067153776752675;
+/// 2/pi
+pub const FRAC_2_PI: f64 = 0.63661977236758134307553505349;
+/// Tau = 2 * pi
+pub const TAU: f64 = 6.28318530717958647692528676656;
+/// sqrt(pi)
+pub const SQRTPI: f64 = 1.77245385090551602729816748334;
+/// sqrt(2)
+pub const SQRT2: f64 = 1.41421356237309504880168872421;
+/// 1/sqrt(2)
+pub const SQRT1_2: f64 = 0.70710678118654752440084436210;
 /// e
 pub const E: f64 = 2.71828182845904523536;
 /// i
 pub const I: Cmplx = Cmplx::new( 0.0, 1.0 );
-
-
+/// Euler's constant
+pub const EULER: f64 = 0.57721566490153286060651209008;

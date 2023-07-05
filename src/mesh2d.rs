@@ -164,10 +164,10 @@ impl Mesh2D<f64> {
             for j in 0..self.ny-1 {
                 let dy = self.y_nodes[ j + 1 ] - self.y_nodes[ j ];
                 sum += 0.25 * dx * dy * ( 
-                      libm::pow( self.vars[ i * self.ny + j ][ var ].abs(), 2.0 )
-                    + libm::pow( self.vars[ ( i + 1 ) * self.ny + j ][ var ].abs(), 2.0 )
-                    + libm::pow( self.vars[ i * self.ny + j + 1 ][ var ].abs(), 2.0 )
-                    + libm::pow( self.vars[ ( i + 1 ) * self.ny + j + 1 ][ var ].abs(), 2.0 ) );
+                      f64::powf( self.vars[ i * self.ny + j ][ var ].abs(), 2.0 )
+                    + f64::powf( self.vars[ ( i + 1 ) * self.ny + j ][ var ].abs(), 2.0 )
+                    + f64::powf( self.vars[ i * self.ny + j + 1 ][ var ].abs(), 2.0 )
+                    + f64::powf( self.vars[ ( i + 1 ) * self.ny + j + 1 ][ var ].abs(), 2.0 ) );
             }
         }
         sum

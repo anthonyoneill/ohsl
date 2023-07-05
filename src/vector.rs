@@ -415,7 +415,7 @@ impl Vector<f64> {
     pub fn powspace( a: f64, b: f64, size: usize, p: f64 ) -> Self {
         let mut vec = vec![ 0.0; size ];
         for i in 0..size {
-            vec[i] = a + (b - a) * libm::pow( (i as f64) / ((size as f64) - 1.0), p );
+            vec[i] = a + (b - a) * f64::powf( (i as f64) / ((size as f64) - 1.0), p );
         }
         Vector{ vec, size }
     }
@@ -425,9 +425,9 @@ impl Vector<f64> {
     pub fn norm_2(&self) -> f64 {
         let mut result = 0.0;
         for i in 0..self.size {
-            result += libm::pow( self.vec[i].abs(), 2.0 );
+            result += f64::powf( self.vec[i].abs(), 2.0 );
         }
-        libm::sqrt( result )
+        f64::sqrt( result )
     }
 
     /// Return the Lp norm: p-th root of the sum of the absolute values 
@@ -436,9 +436,9 @@ impl Vector<f64> {
     pub fn norm_p(&self, p: f64 ) -> f64 {
         let mut result = 0.0;
         for i in 0..self.size {
-            result += libm::pow( self.vec[i].abs(), p );
+            result += f64::powf( self.vec[i].abs(), p );
         }
-        libm::pow( result, 1.0/p )
+        f64::powf( result, 1.0/p )
     }
 
     /// Return the Inf norm: largest absolute value element (p -> infinity)

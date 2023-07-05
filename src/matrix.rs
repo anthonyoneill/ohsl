@@ -456,10 +456,10 @@ impl Matrix<f64> {
         let mut sum: f64 = 0.0;
         for i in 0..self.rows {
             for j in 0..self.cols {
-                sum += libm::pow( self[i][j].abs(), p );
+                sum += f64::powf( self[i][j].abs(), p );
             }
         }
-        libm::pow( sum, 1.0/p )
+        f64::powf( sum, 1.0/p )
     }
 
     /// Return the matrix Frobenius norm 

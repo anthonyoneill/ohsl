@@ -255,7 +255,7 @@ impl Complex::<f64> {
     /// Return the absolute value ( |z| = sqrt( z * z.conj() ) )
     #[inline]
     pub fn abs(&self) -> f64 {
-        libm::sqrt( self.abs_sqr() )
+        f64::sqrt( self.abs_sqr() )
     }
 }
 
