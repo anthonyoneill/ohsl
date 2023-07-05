@@ -42,8 +42,8 @@ fn solve_f64() {
 
 fn vecfunc( x: Vec64 ) -> Vec64 {
     let mut f = Vec64::new( 2, 0.0 );
-    f[0] = libm::pow( x[0], 3.0 ) + x[1] -1.0;
-    f[1] = libm::pow( x[1], 3.0 ) - x[0] + 1.0;
+    f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
+    f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
     /*
         x^3 + y - 1 = 0,
         y^3 - x + 1 = 0,
@@ -75,10 +75,10 @@ fn solve_vec64() {
 
 fn jacfunc( x: Vec64 ) -> Mat64 {
     let mut j = Mat64::new( 2, 2, 0.0 );
-    j[0][0] = 3.0 * libm::pow( x[0], 2.0 );
+    j[0][0] = 3.0 * f64::powf( x[0], 2.0 );
     j[0][1] = 1.0;
     j[1][0] = -1.0;
-    j[1][1] = 3.0 * libm::pow( x[1], 2.0 );
+    j[1][1] = 3.0 * f64::powf( x[1], 2.0 );
     /*
         J = [ 3x^2,  1   
                 -1 , 3y^2 ]

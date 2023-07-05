@@ -11,7 +11,7 @@ fn main() {
     println!( " * with initial guess x_0 = 1.");
 
     fn function(x: f64) -> f64 {
-        libm::cos( x ) - x
+        f64::cos( x ) - x
     }
     let newton = Newton::<f64>::new( 1.0 );
     let solution = newton.solve( &function );
@@ -27,8 +27,8 @@ fn main() {
 
     fn vector_function( x: Vec64 ) -> Vec64 {
         let mut f = Vec64::new( 2, 0.0 );
-        f[0] = libm::pow( x[0], 3.0 ) + x[1] -1.0;
-        f[1] = libm::pow( x[1], 3.0 ) - x[0] + 1.0;
+        f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
+        f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
         f
     }
     let newton = Newton::<Vec64>::new( guess );

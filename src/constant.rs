@@ -12,3 +12,5 @@ pub const E: f64 = 2.71828182845904523536;
 pub const I: Cmplx = Cmplx::new( 0.0, 1.0 );
 
 
+//TODO use https://www.gnu.org/software/gsl/doc/html/math.html#elementary-functions
+

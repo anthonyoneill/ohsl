@@ -19,7 +19,7 @@ fn test_complex_abs() {
 fn test_complex_arg() {
     let z = Cmplx::new( 3.0, 4.0 );
     let theta = z.arg();
-    assert_eq!( theta, libm::atan( 4.0 / 3.0 ) );
+    assert_eq!( theta, f64::atan( 4.0 / 3.0 ) );
 }
 
 #[test]

@@ -3,7 +3,7 @@
 extern crate ohsl;
 
 pub use ohsl::vector::{Vector, Vec64};
-pub use ohsl::constant;
+pub use ohsl::constant::*;
 
 
 fn main() {
@@ -53,8 +53,8 @@ fn main() {
 
     // Angle between the two vectors
     let cos: f64 = a.dot( b.clone() ) / ( a.norm_2() * b.norm_2() );
-    let rad = libm::acos( cos );
-    let deg = rad * 180.0 / constant::PI;
+    let rad = f64::acos( cos );
+    let deg = rad * 180.0 / PI;
     println!( "  * angle between a and b = {} degrees", deg );
 
     // Create vectors of spaced elements

@@ -1,12 +1,3 @@
-/// pi
-pub const PI: f64 = 3.14159265358979323846;
-/// pi/2 
-pub const PI_2: f64 = 1.57079632679489661923;
-/// Square root of 2
-pub const SQRT2: f64 = 1.41421356237309504880;
-/// e
-pub const E: f64 = 2.71828182845904523536;
-
 // Factorial function n! = n x (n-1) x (n-2) x ... x 2 x 1, n <= 20. 
 // For larger values of n use the gamma function n! = gamma(n+1)
 /*fn factorial(n: u64) -> f64 {
@@ -25,10 +16,6 @@ pub const E: f64 = 2.71828182845904523536;
 // book by Lorentzen and Waadeland ) 
 // Could combine power series and continued fractions to calculate
 // functions in different domains of convergence. 
-// Ideally we want to remove the dependency upon libm 
-
-// TODO - sqrtf64 - copying libm sqrt function (separate to general 
-// sqrt function)
 
 pub fn test_function<T>(input: T) -> T {
     input
@@ -37,6 +24,8 @@ pub fn test_function<T>(input: T) -> T {
 
 
 // elementary.rs plan
+
+// Could just use std f64 functions
 
 /*
 1. constants 
