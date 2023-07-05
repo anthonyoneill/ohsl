@@ -5,7 +5,6 @@
 
 //TODO quaternion.rs -> implement as a scalar and vector part in a struct + examples
 
-pub mod elementary;
 pub mod constant;
 pub mod complex;
 pub mod vector;
