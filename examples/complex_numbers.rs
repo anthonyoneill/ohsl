@@ -3,7 +3,7 @@
 extern crate ohsl;
 
 pub use ohsl::complex::{Complex, Cmplx};
-pub use ohsl::constant;
+pub use ohsl::constant::I;
 
 fn main() {
     println!("----- Complex numbers -----");
@@ -36,6 +36,6 @@ fn main() {
     println!( "  * z1 - 2 = {}", z1 - real );
     println!( "  * z1 * 2 = {}", z1 * real );
     println!( "  * z1 / 2 = {}", z1 / real );
-    println!( "  * z1 + i = {}", z1 + constant::I );  
+    println!( "  * z1 + i = {}", z1 + I );  
     println!( "--- FINISHED ---" );
 }
