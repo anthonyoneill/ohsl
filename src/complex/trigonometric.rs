@@ -63,21 +63,21 @@ impl Complex::<f64> {
     /// Return the inverse sec of a complex number z ( asec(z) )
     #[inline]
     pub fn asec(&self) -> Complex<f64> {
-        let inv = Complex::<f64>::one() / self.clone();
+        let inv = Cmplx::one() / self.clone();
         inv.acos()
     }
 
     /// Return the inverse csc of a complex number z ( acsc(z) )
     #[inline]
     pub fn acsc(&self) -> Complex<f64> {
-        let inv = Complex::<f64>::one() / self.clone();
+        let inv = Cmplx::one() / self.clone();
         inv.asin()
     }
 
     /// Return the inverse cot of a complex number z ( acot(z) )
     #[inline]
     pub fn acot(&self) -> Complex<f64> {
-        let inv = Complex::<f64>::one() / self.clone();
+        let inv = Cmplx::one() / self.clone();
         inv.atan()
     }
 }
