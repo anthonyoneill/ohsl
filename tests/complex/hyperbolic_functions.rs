@@ -71,6 +71,3 @@ fn test_complex_acoth() {
     let z = Complex::new(1.0, 1.0);
     assert!((z.acoth() - Complex::new( 0.4023594781085251, -0.5535743588970452 ) ).abs() < 1e-15);
 }
-
-
-
