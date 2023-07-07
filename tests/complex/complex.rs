@@ -21,6 +21,8 @@ fn conjugate() {
 mod basic_arithmetic;
 mod assignment_arithmetic;
 mod elementary_functions;
+mod trig_functions;
+mod hyperbolic_functions;
 
 #[test]
 fn test_complex_ordering() {
