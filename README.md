@@ -14,6 +14,7 @@ ohsl (ostensibly handy scientific library) is a collection of numerical routines
 - [x] Root finding 
 - [ ] Eigensystems
 - [x] Sparse linear algebra 
+- [ ] Sparse eigensystems
 - [ ] Differential equations 
 - [ ] Chebyshev approximation
 
