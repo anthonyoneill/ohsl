@@ -1,7 +1,25 @@
 use std::mem;
+use core::ops::{Index, IndexMut};
 pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
 pub use crate::traits::{Number, Signed, Zero, One};
+
+impl<T> Index<usize> for Matrix<T> {
+    type Output = Vector<T>;
+    /// Indexing operator [] (read only)
+    #[inline]
+    fn index<'a>(&'a self, index: usize ) -> &'a Vector<T> {
+        &self.mat[ index ]
+    }
+}
+
+impl<T> IndexMut<usize> for Matrix<T> {
+    /// Indexing operator [] (read/write)
+    #[inline]
+    fn index_mut(&mut self, index: usize ) -> &mut Vector<T> {
+        &mut self.mat[ index ] 
+    }
+}
 
 impl<T> Matrix<T> {
     /// Remove all the elements from the matrix 

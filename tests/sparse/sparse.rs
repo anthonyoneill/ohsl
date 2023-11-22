@@ -79,7 +79,5 @@ fn solve() {
     let rhs = vec![1.0, 1.0, 1.0];
     let soln = s._solve(rhs).unwrap();
     let correct = vec![6.0/44.0, 19.0/44.0, -10.0/44.0];
-    for k in 0..soln.len() {
-        assert_eq!( soln[k], correct[k] );
-    }
+    assert_eq!( soln, correct );
 }

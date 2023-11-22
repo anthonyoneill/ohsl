@@ -3,7 +3,6 @@ pub mod arithmetic;
 pub mod solve;
 pub mod functions;
 
-use core::ops::{Index, IndexMut};
 use std::{fmt, fs::File, io::Write};
 
 pub use crate::traits::{Number, Signed, Zero, One};
@@ -73,23 +72,6 @@ impl<T: Clone> Clone for Matrix<T> {
     #[inline]
     fn clone(&self) -> Self {
         Self::create( self.mat.clone() )
-    }
-}
-
-impl<T> Index<usize> for Matrix<T> {
-    type Output = Vector<T>;
-    /// Indexing operator [] (read only)
-    #[inline]
-    fn index<'a>(&'a self, index: usize ) -> &'a Vector<T> {
-        &self.mat[ index ]
-    }
-}
-
-impl<T> IndexMut<usize> for Matrix<T> {
-    /// Indexing operator [] (read/write)
-    #[inline]
-    fn index_mut(&mut self, index: usize ) -> &mut Vector<T> {
-        &mut self.mat[ index ] 
     }
 }
 
