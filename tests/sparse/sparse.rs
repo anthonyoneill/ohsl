@@ -1,5 +1,5 @@
-use ohsl::matrix::{Sparse, MatrixState, Axis};
-use ohsl::vector::{Vec64};
+use ohsl::sparse_matrix::{Sparse, MatrixState, Axis};
+use ohsl::vector::Vec64;
 
 #[test]
 fn create_matrix() {

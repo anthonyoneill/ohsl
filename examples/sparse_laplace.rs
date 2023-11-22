@@ -3,9 +3,10 @@
 extern crate ohsl;
 
 pub use ohsl::vector::{Vector, Vec64};
-pub use ohsl::matrix::{Matrix, Mat64, Sparse};
+pub use ohsl::matrix::{Matrix, Mat64};
+pub use ohsl::sparse_matrix::Sparse;
 
-use std::time::{Instant};
+use std::time::Instant;
 
 fn main() {
     println!( "------------------ Laplace's equation ------------------" );
