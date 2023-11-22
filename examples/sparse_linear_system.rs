@@ -3,7 +3,8 @@
 extern crate ohsl;
 
 pub use ohsl::vector::{Vector, Vec64};
-pub use ohsl::matrix::{Matrix, Mat64, Sparse};
+pub use ohsl::matrix::{Matrix, Mat64};
+pub use ohsl::sparse_matrix::Sparse;
 
 fn main() {
     println!( "------------------ Sparse linear system ------------------" );

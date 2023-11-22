@@ -21,7 +21,7 @@ fn conjugate() {
 mod basic_arithmetic;
 mod assignment_arithmetic;
 mod elementary_functions;
-mod trig_functions;
+mod trigonometric_functions;
 mod hyperbolic_functions;
 
 #[test]

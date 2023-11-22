@@ -13,6 +13,7 @@ pub mod matrix;
 pub mod mesh1d;
 pub mod newton;
 pub mod mesh2d;
+pub mod sparse_matrix;
 
 // Re-exports
 pub use self::complex::{Complex, Cmplx};
@@ -22,3 +23,4 @@ pub use self::matrix::{Matrix, Mat64};
 pub use self::mesh1d::Mesh1D;
 pub use self::newton::Newton;
 pub use self::mesh2d::Mesh2D;
+pub use self::sparse_matrix::Sparse;

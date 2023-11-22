@@ -1,5 +1,5 @@
 use core::ops::{Index, IndexMut};
-use std::{fmt, fs::{File}, io::Write }; 
+use std::{fmt, fs::File, io::Write }; 
 
 pub use crate::traits::{Number, Signed, Zero, One};
 pub use crate::vector::Vector;
@@ -66,15 +66,19 @@ impl<T: Clone + Number> Mesh2D<T> {
     /// Set the variables stored at a specified node 
     #[inline]
     pub fn set_nodes_vars(&mut self, nodex: usize, nodey: usize, vec: Vector<T> ) {
-        //TODO node range checking
-        if vec.size() != self.nvars { panic!( "Mesh2D error: set_nodes_vars " ); }
+        if ( nodex > self.nx - 1 ) || ( nodey > self.ny - 1 ) { 
+            panic!( "Mesh2D error: set_nodes_vars range error." ); 
+        }
+        if vec.size() != self.nvars { panic!( "Mesh2D error: set_nodes_vars nvars error." ); }
         self.vars[ nodex * self.ny + nodey ] = vec;
     }
 
     /// Get the vector of variables stored at a specified node
     #[inline]
     pub fn get_nodes_vars(&self, nodex: usize, nodey: usize ) -> Vector<T> {
-        //TODO node range checking
+        if ( nodex > self.nx - 1 ) || ( nodey > self.ny - 1 ) { 
+            panic!( "Mesh2D error: get_nodes_vars range error." ); 
+        }
         self.vars[ nodex * self.ny + nodey ].clone()
     }
 
@@ -113,7 +117,7 @@ impl<T: Clone + Number> Mesh2D<T> {
     /// Return a matrix for a variable corresponding to each nodal point
     #[inline]
     pub fn var_as_matrix(&self, var: usize ) -> Matrix<T> {
-        //TODO check var size
+        if var >= self.nvars { panic!( "Mesh2D var_as_matrix: index larger than # variables." ); }
         let mut m = Matrix::<T>::new( self.nx, self.ny, T::zero() );
         for i in 0..self.nx {
             for j in 0..self.ny {
@@ -173,9 +177,6 @@ impl Mesh2D<f64> {
         sum
     }
 }
-
-
-//TODO range checks on indexing 
 
 impl<T> Index<(usize, usize)> for Mesh2D<T> {
     type Output = Vector<T>;
