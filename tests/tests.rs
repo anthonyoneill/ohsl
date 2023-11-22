@@ -18,3 +18,6 @@ mod newton;
 
 #[path = "sparse/sparse.rs"]
 mod sparse;
+
+#[path = "polynomial/polynomial.rs"]
+mod polynomial;
