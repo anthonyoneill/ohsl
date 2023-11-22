@@ -43,15 +43,15 @@ impl<T: Clone + Number, X: Clone + Number + Copy> Mesh1D<T, X> {
     /// Set the variables stored at a specified node
     #[inline]
     pub fn set_nodes_vars(&mut self, node: usize, vec: Vector<T> ) {
-        //TODO node range checking
-        if vec.size() != self.nvars { panic!( "Mesh1D error: set_nodes_vars " ); }
+        if node >= self.nodes.size() { panic!( "Mesh1D error: set_nodes_vars range error." ); }
+        if vec.size() != self.nvars { panic!( "Mesh1D error: set_nodes_vars nvars error." ); }
         self.vars[ node ] = vec;
     }
 
     /// Get the vector of variables stored at a specified node
     #[inline]
     pub fn get_nodes_vars(&self, node: usize ) -> Vector<T> {
-        //TODO node range checking
+        if node >= self.nodes.size() { panic!( "Mesh1D error: get_nodes_vars range error." ); }
         self.vars[ node ].clone()
     }
 
@@ -67,7 +67,6 @@ impl Mesh1D<f64, f64> {
     /// Get the variables at an interpolated position ( first order scheme )
     #[inline]
     pub fn get_interpolated_vars(&self, x_pos: f64 ) -> Vector<f64> {
-        //TODO range checking 
         let mut result = Vector::<f64>::new( self.nvars, 0.0 );
         for node in 0..self.nodes.size()-1 {
             if (( self.nodes[ node ] < x_pos ) && ( self.nodes[ node + 1 ] > x_pos ))
@@ -121,7 +120,6 @@ impl Mesh1D<f64, f64> {
             }
         }
     }
-
 }
 
 //TODO Mesh1D<Complex::<f64>, f64> get_interpolated_vars
