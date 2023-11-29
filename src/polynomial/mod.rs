@@ -1,7 +1,9 @@
-use core::ops::{Index, IndexMut, Add};
-//use core::ops::{Neg, Add, Sub, Mul, Div};
+pub mod arithmetic;
+
+use core::ops::{Add, Mul};
+use std::fmt;
 use crate::{ Cmplx, Vector };
-use crate::traits::{Zero, Number};
+use crate::traits::{Zero, Signed};
 
 pub struct Polynomial<T> {
     /// The coefficients of the polynomial
@@ -55,9 +57,9 @@ impl<T> Polynomial<T> {
 
     /// Evaluate the polynomial at a given point
     #[inline]
-    pub fn evaluate(&self, x: T) -> T
+    pub fn eval(&self, x: T) -> T
     where
-        T: Copy + core::ops::Mul<Output = T> + core::ops::Add<Output = T>,
+        T: Copy + Mul<Output = T> + Add<Output = T>,
     {
         let degree = self.degree().unwrap(); //TODO unwrap
         let mut p = self.coeffs[ degree ];
@@ -67,8 +69,30 @@ impl<T> Polynomial<T> {
         p
     }
 
-    //TODO polydiv, derivative (and integral?) use Luna Polynomial class as a guide
+    /// Check if all the coefficients are zero
+    #[inline]
+    pub fn is_zero(&self) -> bool
+    where
+        T: Zero + PartialEq,
+    {
+        for i in 0..self.coeffs.len() {
+            if self.coeffs[ i ] != T::zero() { return false; }
+        }
+        true
+    }
 
+    /// Remove leading zeros from the polynomial
+    #[inline]
+    pub fn trim(&mut self) 
+    where
+        T: Zero + PartialEq,
+    {
+        let mut i = self.coeffs.len() - 1;
+        while self.coeffs[ i ] == T::zero() && i > 0 {
+            self.coeffs.pop();
+            i -= 1;
+        }
+    }
 }
 
 impl<T: Clone> Clone for Polynomial<T> {
@@ -79,37 +103,89 @@ impl<T: Clone> Clone for Polynomial<T> {
     }
 }
 
-impl<T: Copy + Clone + Number> Add<Polynomial<T>> for Polynomial<T> {
-    type Output = Self;
-    /// Add two polynomials together ( binary + )
+impl<T: Clone + Copy + Zero + Mul<Output = T> + Add<Output = T>> Polynomial<T> {
+    /// Return the derivative of the polynomial
     #[inline]
-    fn add(self, plus: Self) -> Self::Output {
-        let mut sum = Polynomial::<T>::empty();
-        let mut degree = match self.degree() {
-            Ok( d ) => d,
-            Err( _ ) => { return plus.clone(); },
-        };
-        let plus_degree = match plus.degree() {
-            Ok( d ) => d,
-            Err( _ ) => { return self.clone(); },
-        };
-        if degree < plus_degree {
-            degree = plus_degree;
-        }
-        sum.coeffs = vec![ T::zero(); degree + 1 ];
-        for i in 0..=degree {
-            if i <= self.degree().unwrap() {
-                sum.coeffs[ i ] = sum.coeffs[ i ] + self.coeffs[ i ].clone();
-            }
-            if i <= plus.degree().unwrap() {
-                sum.coeffs[ i ] = sum.coeffs[ i ] + plus.coeffs[ i ].clone();
+    pub fn derivative(&self) -> Polynomial<T> {
+        let mut p = Polynomial::<T>::empty();
+        let degree = self.degree().unwrap(); //TODO unwrap
+        p.coeffs = vec![ T::zero(); degree ];
+        for i in 0..degree {
+            //p.coeffs[ i ] = self.coeffs[ i + 1 ].clone() * ( i + 1 ) as f64;
+            for _ in 0..=i {
+                p.coeffs[ i ] = p.coeffs[ i ] + self.coeffs[ i + 1 ].clone();
             }
         }
-        sum
+        p
+    }
+
+    /// Return the nth derivative of the polynomial
+    #[inline]
+    pub fn derivative_n(&self, n: usize) -> Polynomial<T> {
+        let mut p = self.clone();
+        for _ in 0..n {
+            p = p.derivative();
+        }
+        p
+    }
+
+    /// Return the nth derivative of the polynomial at a given point
+    #[inline]
+    pub fn derivative_at(&self, x: T, n: usize) -> T {
+        let p = self.derivative_n( n );
+        p.eval( x )
     }
 }
 
-//TODO subtraction, multiplication, division (quotient and remainder)
+impl<T: fmt::Display + Zero + std::cmp::PartialOrd + Signed> fmt::Display for Polynomial<T>
+{
+    /// Format the output of the polynomial
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let mut s = String::new();
+        let degree = self.degree().unwrap(); //TODO unwrap
+        for i in (0..=degree).rev() {
+            let sign = if self.coeffs[ i ] < T::zero() { "-" } else { "+" };
+            if i == degree && i != 1 && i != 0 {
+                s.push_str( &format!( "{}x^{}", self.format_leading_coeff( i ), i ) );
+                //s.push_str( &format!( "{}x^{}", self.coeffs[ i ], i ) );
+            } else if i == degree && i == 1 {
+                s.push_str( &format!( "{}x", self.format_leading_coeff( i ) ) );
+                //s.push_str( &format!( "{}x", self.coeffs[ i ] ) );
+            } else if i == degree && i == 0 {
+                s.push_str( &format!( "{}", self.coeffs[ i ] ) );
+            } else if i == 1 {
+                s.push_str( &format!( " {} {}x", sign, self.coeffs[ i ].abs() ) );
+            } else if i == 0 {
+                s.push_str( &format!( " {} {}", sign, self.coeffs[ i ].abs() ) );
+            } else {
+                s.push_str( &format!( " {} {}x^{}", sign, self.coeffs[ i ].abs(), i ) );
+            }
+        }
+        write!(f, "{}", s )
+    }
+} 
+
+impl<T: Zero + std::cmp::PartialOrd + Signed + fmt::Display> Polynomial<T> {
+    fn format_leading_coeff( &self, i: usize ) -> String {  
+        let mut str = String::new();
+        if self.coeffs[ i ] == T::one() {
+            str.push_str( "" );
+        } else if self.coeffs[ i ] == -T::one() {
+            str.push_str( "-" );
+        } else {
+            str.push_str( &format!( "{}", self.coeffs[ i ] ) );
+        }
+        str
+    }
+}
+
+impl<T: fmt::Debug> fmt::Debug for Polynomial<T>
+{
+    /// Format the debug output of the polynomial
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{:?}", self.coeffs )
+    }
+} 
 
 impl Polynomial<f64> {
     /// Find all the roots of the polynomial with f64 coefficients
@@ -122,45 +198,6 @@ impl Polynomial<f64> {
         }
         Polynomial::<Cmplx>::poly_solve( coeffs, refine )
     }
-
-    /// Divide the polynomial by another polynomial to get a quotient and remainder
-    #[inline]
-    pub fn polydiv( &self, v: &Polynomial<f64> ) -> Result<( Polynomial<f64>, Polynomial<f64> ), &'static str> {
-        let mut n = self.degree()?;
-        let mut nv = v.degree()? as isize;
-        while ( nv >= 0 ) && ( v.coeffs[ nv as usize ] == 0.0 ) { nv -= 1; }
-        if nv < 0 { return Err( "Polynomial.polydiv() divide by zero polynomial" ); }
-        
-        let mut r = Polynomial::<f64>::new( self.coeffs.clone() );
-        let mut q = Polynomial::<f64>::empty();
-        q.coeffs = vec![ 0.0; n - nv as usize + 1 ];
-
-        for k in (0..=n-nv as usize).rev() {
-            q.coeffs[ k ] = r.coeffs[ nv as usize + k ] / v.coeffs[ nv as usize ];
-            for j in (k..=nv as usize).rev() {
-                r.coeffs[ j ] -= q.coeffs[ k ] * v.coeffs[ j - k ];
-            }
-        }
-        for j in (nv as usize)..=n {
-            r.coeffs[ j ] = 0.0;
-        }
-        // Remove leading zeros from r and q polynomials
-        let mut r_val = r.coeffs[ n ];
-        while r_val.abs() == 0.0 && n > 0 {
-            r.coeffs.pop();
-            n -= 1;
-            r_val = r.coeffs[ n ];
-        }
-        n = self.degree()? - nv as usize;
-        let mut q_val = q.coeffs[ n ];
-        while q_val.abs() == 0.0 && n > 0 {
-            q.coeffs.pop();
-            n -= 1;
-            q_val = q.coeffs[ n ];
-        }
-        Ok( ( q, r ) )
-    }
-
 }
 
 impl Polynomial<Cmplx> {
@@ -309,21 +346,3 @@ impl Polynomial<Cmplx> {
     }
 }
 
-impl<T> Index<usize> for Polynomial<T> {
-    type Output = T;
-    /// Indexing operator [] (read only)
-    #[inline]
-    fn index<'a>(&'a self, index: usize ) -> &'a T {
-        if index >= self.coeffs.len() { panic!( "Index out of bounds" ); }
-        &self.coeffs[ index ]
-    }
-}
-
-impl<T> IndexMut<usize> for Polynomial<T> {
-    /// Indexing operator [] (read/write)
-    #[inline]
-    fn index_mut(&mut self, index: usize ) -> &mut T {
-        if index >= self.coeffs.len() { panic!( "Index out of bounds" ); }
-        &mut self.coeffs[ index ] 
-    }
-}
