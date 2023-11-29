@@ -10,7 +10,7 @@ ohsl (ostensibly handy scientific library) is a collection of numerical routines
 - [x] Vectors
 - [x] Matrices
 - [x] Linear algebra 
-- [ ] Roots of polynomials
+- [x] Polynomials
 - [x] Root finding 
 - [ ] Eigensystems
 - [x] Sparse linear algebra 
