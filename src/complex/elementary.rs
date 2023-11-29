@@ -51,4 +51,12 @@ impl Complex::<f64> {
     pub fn log(&self, b: Complex::<f64>) -> Complex::<f64> {
         self.ln() / b.ln()
     }
+
+    /// Create a new complex number with magnitude r and phase angle theta
+    #[inline]
+    pub fn polar(r: f64, theta: f64) -> Complex::<f64> {
+        let real = r * theta.cos();
+        let imag = r * theta.sin();
+        Complex::new( real, imag )
+    }
 }
