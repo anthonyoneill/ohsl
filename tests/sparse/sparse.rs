@@ -1,3 +1,5 @@
+mod tridiagonal;
+
 use ohsl::sparse_matrix::{Sparse, MatrixState, Axis};
 use ohsl::vector::Vec64;
 
