@@ -1,3 +1,5 @@
+// cargo run --example polynomial
+
 pub use ohsl::Polynomial;
 
 fn main() {

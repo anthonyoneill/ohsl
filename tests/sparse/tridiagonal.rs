@@ -336,7 +336,7 @@ fn conjugate() {
 fn solve() {
     let mat = Tridiagonal::<f64>::with_elements( 1.0, 2.0, 3.0, 3);
     let b = Vector::<f64>::ones( 3 );
-    let x = mat.solve( b );
+    let x = mat.solve( &b );
     assert_eq!( x[0], -1.0 );
     assert_eq!( x[1], 1.0 );
     assert_eq!( x[2], 0.0 );
