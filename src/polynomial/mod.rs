@@ -213,10 +213,10 @@ impl Polynomial<Cmplx> {
     // Solve the quadratic equation ax^2 + bx + c = 0
     fn quadratic_solve( a: Cmplx, b: Cmplx, c: Cmplx ) -> Vector::<Cmplx> {
         let mut roots = Vector::<Cmplx>::zeros( 2 );
-        let discriminant: Cmplx = b * b - a * c * 4.0;
+        let discriminant: Cmplx = b * b - 4.0 * a * c;
         let mut sgn: f64 = ( b.conj() * discriminant.sqrt() ).real;
         if sgn >= 0.0 { sgn = 1.0; } else { sgn = -1.0; }
-        let q: Cmplx = -( b + discriminant.sqrt() * sgn ) * 0.5;
+        let q: Cmplx = - 0.5 * ( b + discriminant.sqrt() * sgn );
         roots[0] = q / a;
         roots[1] = c / q;
         roots
@@ -227,22 +227,22 @@ impl Polynomial<Cmplx> {
     fn cubic_solve( a: Cmplx, b: Cmplx, c: Cmplx, d: Cmplx ) -> Vector::<Cmplx> {
         let mut roots = Vector::<Cmplx>::zeros( 3 );
         let ( a2, b2, c2, d2 ) = ( a * a, b * b, c * c, d * d );
-        let dis = a * b * c * d * 18. - b * b2 * d * 4. + b2 * c2 - a * c2 * c * 4. - a2 * d2 * 27.;
-        let d0 = b2 - a * c * 3.;
-        let d1 = b2 * b * 2. - a * b * c * 9. + a2 * d * 27.;
+        let dis = 18. * a * b * c * d - 4. * b * b2 * d + b2 * c2 - 4. * a * c2 * c - 27. * a2 * d2;
+        let d0 = b2 - 3. * a * c;
+        let d1 = 2. * b2 * b - 9. * a * b * c + 27. * a2 * d;
         if d0 == Cmplx::zero() && d1 == Cmplx::zero() { // 3 equal roots
-            roots[0] = -b / ( a * 3.0 );
+            roots[0] = -b / ( 3. * a );
             roots[1] = roots[0];
             roots[2] = roots[0];
         } else {
-            let sqrt = (-a * a * dis * 27.0).sqrt();
-            let base = if d1 < Cmplx::zero() { d1 - sqrt } else { d1 + sqrt } / 2.0;
+            let sqrt = (- 27. * a * a * dis).sqrt();
+            let base = if d1 < Cmplx::zero() { d1 - sqrt } else { d1 + sqrt } / 2.;
             let k = base.pow( &Cmplx::new( 1. / 3.0, 0.0 ) );
-            roots[0] = -(b + k + d0 / k) / ( a * 3.0 );
+            roots[0] = -(b + k + d0 / k) / ( 3. * a );
             let u = Cmplx::new( -0.5, (3.0_f64).sqrt() / 2.0 );
-            roots[1] = -(b + u * k + d0 / ( u * k ) ) / ( a * 3.0 );
+            roots[1] = -(b + u * k + d0 / ( u * k ) ) / ( 3. * a );
             let u2 = u * u;
-            roots[2] = -(b + u2 * k + d0 / ( u2 * k ) ) / ( a * 3.0 );
+            roots[2] = -(b + u2 * k + d0 / ( u2 * k ) ) / ( 3. * a );
         }
         roots
     }
@@ -327,7 +327,7 @@ impl Polynomial<Cmplx> {
             if b.abs() <= err { return; }
             let g = d / b;
             let g2 = g * g;
-            let h = g2 - ( f / b ) * 2.0;
+            let h = g2 - 2. * ( f / b );
             let sq = ( ( h * (m as f64) - g2 ) * ( m - 1 ) as f64  ).sqrt();
             let mut gp = g + sq;
             let gm = g - sq;
