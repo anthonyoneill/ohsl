@@ -37,22 +37,22 @@ fn main() {
     b.resize( 5 );
     b[ 4 ] = - 3.0;
     b.swap( 3, 4 );
-    println!("  * a = {}", a.clone() );
-    println!("  * b = {}", b.clone() );
+    println!("  * a = {}", a );
+    println!("  * b = {}", b );
 
     // Remove elements 
     a.pop();
     a.pop();
     b.resize( 3 );
-    println!( "  * a = {}", a.clone() );
-    println!( "  * b = {}", b.clone() );
+    println!( "  * a = {}", a );
+    println!( "  * b = {}", b );
 
     // Magnitude of the vectors 
     println!( "  * |a| = {}", a.norm_2() );
     println!( "  * |b| = {}", b.norm_p( 2.0 ) );
 
     // Angle between the two vectors
-    let cos: f64 = a.dot( b.clone() ) / ( a.norm_2() * b.norm_2() );
+    let cos: f64 = a.dot( &b ) / ( a.norm_2() * b.norm_2() );
     let rad = f64::acos( cos );
     let deg = rad * 180.0 / PI;
     println!( "  * angle between a and b = {} degrees", deg );

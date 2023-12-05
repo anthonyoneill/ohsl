@@ -122,7 +122,7 @@ impl<T: Clone + Copy + Zero + Number> Tridiagonal<T> {
         temp
     }
 
-    /// Retrun the determinant of the matrix
+    /// Return the determinant of the matrix
     #[inline]
     pub fn det( &self ) -> T {
         let mut f = Vector::new( self.n + 1, T::zero() );
@@ -388,23 +388,13 @@ impl<T: Clone + Number> DivAssign<T> for Tridiagonal<T> {
     }
 }
 
+// Consuming vector multiplication operator
 impl<T: Clone + Copy + Number> Mul<Vector<T>> for Tridiagonal<T> {
     type Output = Vector<T>;
     /// Multiply a tridiagonal matrix with a (column) vector ( tridiagonal matrix * vector )
     #[inline]
     fn mul(self, vec: Vector<T> ) -> Vector<T> {
-        if self.size() != vec.size() { 
-            panic!( "Tridiagonal matrix and vector sizes do not agree (*)." ); 
-        }
-        let mut result = Vector::<T>::new( self.size(), T::zero() );
-        result[ 0 ] = self.main[ 0 ] * vec[ 0 ] + self.sup[ 0 ] * vec[ 1 ];
-        for i in 1..self.size() - 1 {
-            result[ i ] = self.sub[ i - 1 ] * vec[ i - 1 ] + self.main[ i ] * vec[ i ]
-                        + self.sup[ i ] * vec[ i + 1 ];
-        }
-        result[ self.n - 1 ] = self.sub[ self.n - 2 ] * vec[ self.n - 2 ]  
-                             + self.main[ self.n - 1 ] * vec[ self.n - 1 ];
-        result
+        &self * &vec
     }
 }
 

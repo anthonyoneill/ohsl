@@ -181,7 +181,7 @@ fn scalar_multiplication() {
 #[test]
 fn scalar_division() {
     let mat = Tridiagonal::<f64>::with_elements( 1.0, 2.0, 3.0, 3);
-    let mat2 = mat.clone() / 2.0;
+    let mat2 = mat / 2.0;
     assert_eq!( mat2[( 0, 0 )], 1.0 );
     assert_eq!( mat2[( 0, 1 )], 1.5 );
     assert_eq!( mat2[( 1, 0 )], 0.5 );

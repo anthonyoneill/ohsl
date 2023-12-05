@@ -82,7 +82,7 @@ impl Newton<Vec64> {
             let f: Vec64 = func( current.clone() );
             let max_residual = f.norm_inf();
             let mut j = Mat64::jacobian( current.clone(), func, self.delta );
-            let dx: Vec64 = j.solve_basic( f );
+            let dx: Vec64 = j.solve_basic( &f );
             current -= dx;
             if max_residual <= self.tol {
                 return Ok( current )
@@ -100,7 +100,7 @@ impl Newton<Vec64> {
             let f: Vec64 = func( current.clone() );
             let max_residual = f.norm_inf();
             let mut j: Mat64 = jac( current.clone() ); 
-            let dx: Vec64 = j.solve_basic( f );
+            let dx: Vec64 = j.solve_basic( &f );
             current -= dx;
             if max_residual <= self.tol {
                 return Ok( current )

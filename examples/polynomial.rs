@@ -26,11 +26,11 @@ fn main() {
     // Arithmetic
     let q = Polynomial::cubic( 3.0, 5.0, 4.0, 0.0 );
     println!( "  * q(x) = {}", q );
-    println!( "  * p(x) + q(x) = {}", p.clone() + q.clone() );
-    println!( "  * p(x) - q(x) = {}", p.clone() - q.clone() );
-    println!( "  * -p(x) = {}", -p.clone() );
-    println!( "  * p(x) * q(x) = {}", p.clone() * q.clone() );
-    println!( "  * p(x) * 3  = {}", p.clone() * 3.0 );
+    println!( "  * p(x) + q(x) = {}", &p + &q );
+    println!( "  * p(x) - q(x) = {}", &p - &q );
+    println!( "  * -p(x) = {}", -&p );
+    println!( "  * p(x) * q(x) = {}", &p * &q );
+    println!( "  * p(x) * 3  = {}", &p * 3.0 );
     let result = q.polydiv( &p );
     match result {
         Ok( ( q, r ) ) => println!( "  * q(x) / p(x) = {} remainder {}", q, r ),

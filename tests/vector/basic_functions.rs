@@ -34,11 +34,11 @@ fn swap() {
 fn dot_product() {
     let u = Vector::<u32>::create( vec![ 1, 2, 3 ] );
     let v = Vector::<u32>::create( vec![ 4, 5, 6 ] );
-    let dot = u.dot( v );
+    let dot = u.dot( &v );
     assert_eq!( dot, 32 );
     let u = Vec64::create( vec![ 1.0, 2.0, 3.0 ] );
     let v = Vec64::create( vec![ 4.0, 5.0, 6.0 ] );
-    let dotf64 = u.dotf64( &v );
+    let dotf64 = u.dot( &v );
     assert_eq!( dotf64, 32.0 );
 }
 

@@ -13,7 +13,7 @@ fn unary_minus() {
 fn binary_plus() {
     let m = Matrix::<i32>::new( 2, 2, 1 );
     let n = Matrix::<i32>::new( 2, 2, 4 );
-    let p = m.clone() + n.clone(); 
+    let p = m + n; 
     assert_eq!( p[1][1], 5 );
 }
 
@@ -87,10 +87,10 @@ fn matrix_multiplication() {
     n[2][0] = 2;
     n[2][1] = 1;
     let v = Vector::<i32>::new( 3, 1 );
-    let u: Vector<i32> = m.clone() * v;
+    let u: Vector<i32> = &m * &v; // Non-consuming matrix-vector multiplication
     assert_eq!( u[0], 6 );
     assert_eq!( u[1], 15 );
-    let p = m.clone() * n;
+    let p: Matrix<i32> = &m * &n; // Non-consuming matrix-matrix multiplication
     assert_eq!( p[0][0], 19 );
     assert_eq!( p[0][1], 15 );
     assert_eq!( p[1][0], 52 );

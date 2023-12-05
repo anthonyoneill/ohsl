@@ -2,11 +2,22 @@ use crate::polynomial::Polynomial;
 use core::ops::{Index, IndexMut, Add, Sub, Neg, Mul};
 use crate::traits::{Number, Signed};
 
+// Consuming addition
 impl<T: Copy + Clone + Number> Add<Polynomial<T>> for Polynomial<T> {
     type Output = Self;
     /// Add two polynomials together ( binary + )
     #[inline]
     fn add(self, plus: Self) -> Self::Output {
+        &self + &plus
+    }
+}
+
+// Non-consuming addition
+impl<T: Copy + Clone + Number> Add<&Polynomial<T>> for &Polynomial<T> {
+    type Output = Polynomial<T>;
+    /// Add two polynomials together ( binary + )
+    #[inline]
+    fn add(self, plus: &Polynomial<T>) -> Self::Output {
         let mut sum = Polynomial::<T>::empty();
         let mut degree = match self.degree() {
             Ok( d ) => d,
@@ -30,8 +41,19 @@ impl<T: Copy + Clone + Number> Add<Polynomial<T>> for Polynomial<T> {
     }
 }
 
+// Consuming negation
 impl<T: Clone + Signed> Neg for Polynomial<T> {
     type Output = Self;
+    /// Return the unary negation ( unary - )
+    #[inline]
+    fn neg(self) -> Self::Output {
+        -&self
+    }
+}
+
+// Non-consuming negation
+impl<T: Clone + Signed> Neg for &Polynomial<T> {
+    type Output = Polynomial<T>;
     /// Return the unary negation ( unary - )
     #[inline]
     fn neg(self) -> Self::Output {
@@ -41,11 +63,22 @@ impl<T: Clone + Signed> Neg for Polynomial<T> {
     }
 }
 
+// Consuming subtraction
 impl<T: Copy + Clone + Number + Signed> Sub<Polynomial<T>> for Polynomial<T> {
     type Output = Self;
     /// Subtract one polynomial from another ( binary - )
     #[inline]
     fn sub(self, minus: Self) -> Self::Output {
+        &self - &minus
+    }
+}
+
+// Non-consuming subtraction
+impl<T: Copy + Clone + Number + Signed> Sub<&Polynomial<T>> for &Polynomial<T> {
+    type Output = Polynomial<T>;
+    /// Subtract one polynomial from another ( binary - )
+    #[inline]
+    fn sub(self, minus: &Polynomial<T>) -> Self::Output {
         let mut diff = Polynomial::<T>::empty();
         let mut degree = match self.degree() {
             Ok( d ) => d,
@@ -69,11 +102,22 @@ impl<T: Copy + Clone + Number + Signed> Sub<Polynomial<T>> for Polynomial<T> {
     }
 }
 
+// Consuming multiplication
 impl<T: Copy + Clone + Number> Mul<Polynomial<T>> for Polynomial<T> {
     type Output = Self;
     /// Multiply two polynomials together ( binary * )
     #[inline]
     fn mul(self, times: Self) -> Self::Output {
+        &self * &times
+    }
+}
+
+// Non-consuming multiplication
+impl<T: Copy + Clone + Number> Mul<&Polynomial<T>> for &Polynomial<T> {
+    type Output = Polynomial<T>;
+    /// Multiply two polynomials together ( binary * )
+    #[inline]
+    fn mul(self, times: &Polynomial<T>) -> Self::Output {
         let mut product = Polynomial::<T>::empty();
         let mut degree = match self.degree() {
             Ok( d ) => d,
@@ -94,8 +138,19 @@ impl<T: Copy + Clone + Number> Mul<Polynomial<T>> for Polynomial<T> {
     }
 }
 
+// Consuming scalar multiplication
 impl<T: Copy + Clone + Number> Mul<T> for Polynomial<T> {
     type Output = Self;
+    /// Multiply a polynomial by a scalar ( binary * )
+    #[inline]
+    fn mul(self, times: T) -> Self::Output {
+        &self * times
+    }
+}
+
+// Non-consuming scalar multiplication
+impl<T: Copy + Clone + Number> Mul<T> for &Polynomial<T> {
+    type Output = Polynomial<T>;
     /// Multiply a polynomial by a scalar ( binary * )
     #[inline]
     fn mul(self, times: T) -> Self::Output {

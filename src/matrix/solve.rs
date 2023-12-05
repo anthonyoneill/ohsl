@@ -58,7 +58,7 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
     /// Solve the system of equations Ax=b where b is a specified vector 
     /// using Gaussian elimination (the matrix A is modified in the process)
     #[inline]
-    pub fn solve_basic(&mut self, b: Vector<T> ) -> Vector<T> {
+    pub fn solve_basic(&mut self, b: &Vector<T> ) -> Vector<T> {
         if self.rows != b.size() { panic!( "solve_basic error: rows != b.size()" ); }
         if self.rows != self.cols() { 
             panic!( "solve_basic error: matrix is not square" ); }
@@ -108,7 +108,7 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
     /// Solve the system of equations Ax=b where b is a specified vector 
     /// using LU decomposition (the matrix A is modified in the process)
     #[inline]
-    pub fn solve_lu(&mut self, b: Vector<T> ) -> Vector<T> {
+    pub fn solve_lu(&mut self, b: &Vector<T> ) -> Vector<T> {
         if self.rows != b.size() { panic!( "solve_LU error: rows != b.size()" ); }
         if self.rows != self.cols() { 
             panic!( "solve_LU error: matrix is not square" ); }

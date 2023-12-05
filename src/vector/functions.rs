@@ -14,12 +14,12 @@ impl<T: std::cmp::PartialEq> Vector<T> {
     }
 }
 
-impl<T: Clone> Vector<T> {
+impl<T: Copy> Vector<T> {
     /// Assign a value to every element in the vector
     #[inline]
     pub fn assign(&mut self, elem: T ) {
         for i in 0..self.size {
-            self.vec[i] = elem.clone();
+            self.vec[i] = elem;
         }
     }
 }
@@ -33,14 +33,14 @@ impl<T: std::default::Default> Vector<T> {
     }
 }
 
-impl<T: Clone + Number> Vector<T> {
+impl<T: Copy + Number> Vector<T> {
     /// Return the dot product of two vectors v.dot(w)
     #[inline]
-    pub fn dot(&self, w: Vector<T>) -> T {
+    pub fn dot(&self, w: &Vector<T>) -> T {
         if self.size != w.size { panic!( "Vector sizes do not agree dot()." ); }
         let mut result: T = T::zero();
         for i in 0..self.size {
-            result += self.vec[i].clone() * w.vec[i].clone();
+            result += self.vec[i] * w.vec[i];
         }
         result
     }
