@@ -201,7 +201,7 @@ impl Polynomial<f64> {
 }
 
 impl Polynomial<Cmplx> {
-    /// Find all the roots of the polynomial with Complex<f64> coefficients
+    /// Find all the roots of the polynomial with Cmplx coefficients
     /// refine = true will refine the roots using Laguerre's method
     #[inline]
     pub fn roots( &self, refine: bool ) -> Vector::<Cmplx> {
@@ -247,7 +247,7 @@ impl Polynomial<Cmplx> {
         roots
     }
 
-    // Find all the roots of the polynomial with Complex<f64> coefficients
+    // Find all the roots of the polynomial with Cmplx coefficients
     // refine = true will refine the roots using Laguerre's method
     #[inline]
     fn poly_solve( coeffs: Vector::<Cmplx>, refine: bool ) -> Vector::<Cmplx> {

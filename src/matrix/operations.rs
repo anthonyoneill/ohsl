@@ -31,21 +31,21 @@ impl<T> Matrix<T> {
     }
 }
 
-impl<T: Clone + Number> Matrix<T> {
+impl<T: Clone + Copy + Number> Matrix<T> {
     /// Get a row of the matrix as a vector
     #[inline]
     pub fn get_row(&self, row: usize ) -> Vector<T> {
-        //if row < 0 || self.rows <= row { panic!( "Matrix range error in get_row" ); }
+        if self.rows <= row { panic!( "Matrix range error in get_row" ); }
         self.mat[ row ].clone()
     }
 
     /// Get a column of the matrix as a vector 
     #[inline]
     pub fn get_col(&self, col: usize ) -> Vector<T> {
-        //if col < 0 || self.rows <= col { panic!( "Matrix range error in get_col" ); }
+        if self.rows <= col { panic!( "Matrix range error in get_col" ); }
         let mut result = Vector::<T>::new( self.rows, T::zero() );
         for i in 0..self.rows {
-            result[ i ] = self[i][col].clone()
+            result[ i ] = self[i][col]
         }
         result
     }
@@ -53,36 +53,36 @@ impl<T: Clone + Number> Matrix<T> {
     /// Set a row of the matrix using a vector 
     #[inline]
     pub fn set_row(&mut self, row: usize, vec: Vector<T> ) {
-        //if vec.size() != self.cols { panic!( "Matrix size error in set_row" ); }
-        //if row < 0 || self.rows <= row { panic!( "Matrix range error in set_row" ); }
+        if vec.size() != self.cols { panic!( "Matrix size error in set_row" ); }
+        if self.rows <= row { panic!( "Matrix range error in set_row" ); }
         self[ row ] = vec;
     }
 
     /// Set a column of the matrix using a vector 
     #[inline]
     pub fn set_col(&mut self, col: usize, vec: Vector<T> ) {
-        //if vec.size() != self.rows { panic!( "Matrix size error in set_col" ); }
-        //if col < 0 || self.rows <= col { panic!( "Matrix range error in set_col" ); }
+        if vec.size() != self.rows { panic!( "Matrix size error in set_col" ); }
+        if self.rows <= col { panic!( "Matrix range error in set_col" ); }
         for i in 0..self.rows {
-            self[i][col] = vec[i].clone();
+            self[i][col] = vec[i];
         }
     }
 
     /// Delete a row from the matrix 
     #[inline]
     pub fn delete_row(&mut self, row: usize ) {
-        //if row < 0 || self.rows <= row { panic!( "Matrix range error in delete_row" ); }
+        if self.rows <= row { panic!( "Matrix range error in delete_row" ); }
         self.mat.remove( row );
         self.rows -= 1;
     }
 
     /// Multiply the matrix by a (column) vector and return a vector 
     #[inline]
-    pub fn multiply(&self, vec: Vector<T> ) -> Vector<T> {
+    pub fn multiply(&self, vec: &Vector<T> ) -> Vector<T> {
         if vec.size() != self.cols { panic!( "Matrix dimensions do not agree in multiply." ); }
         let mut result = Vector::<T>::empty();
         for row in 0..self.rows {
-           result.push( self[row].dot( vec.clone() ) );
+           result.push( self[row].dot( vec ) );
         }
         result
     }

@@ -218,14 +218,14 @@ fn polynomial_addition_zero() {
 fn polynomial_addition() {
     let p = Polynomial::new( vec![ 1.0, 2.0, 3.0 ] ); // 1 + 2x + 3x^2
     let q = Polynomial::new( vec![ 4.0, 5.0, 6.0, 7.0 ] ); // 4 + 5x + 6x^2 + 7x^3
-    let r = p.clone() + q;
+    let r = &p + &q; // Non-consuming addition
     assert_eq!( r.degree().unwrap(), 3 );
     assert_eq!( r[0], 5.0 );
     assert_eq!( r[1], 7.0 );
     assert_eq!( r[2], 9.0 );
     assert_eq!( r[3], 7.0 );
     let zero = Polynomial::empty();
-    let s = p + zero;
+    let s = p + zero; // Consuming addition
     assert_eq!( s.degree().unwrap(), 2 );
     assert_eq!( s[0], 1.0 );
     assert_eq!( s[1], 2.0 );
@@ -235,7 +235,12 @@ fn polynomial_addition() {
 #[test]
 fn polynomial_negation() {
     let p = Polynomial::new( vec![ 1.0, 2.0, 3.0 ] ); // 1 + 2x + 3x^2
-    let q = -p.clone();
+    let r = -&p; // Non-consuming negation
+    assert_eq!( r.degree().unwrap(), 2 );
+    assert_eq!( r[0], -1.0 );
+    assert_eq!( r[1], -2.0 );
+    assert_eq!( r[2], -3.0 );
+    let q = -p; // Consuming negation
     assert_eq!( q.degree().unwrap(), 2 );
     assert_eq!( q[0], -1.0 );
     assert_eq!( q[1], -2.0 );
@@ -246,12 +251,12 @@ fn polynomial_negation() {
 fn polynomial_subtraction_zero() {
     let p = Polynomial::new( vec![ 1.0, 2.0, 3.0 ] ); // 1 + 2x + 3x^2
     let zero = Polynomial::empty();
-    let s = zero.clone() - p.clone();
+    let s = &zero - &p; // Non-consuming subtraction
     assert_eq!( s.degree().unwrap(), 2 );
     assert_eq!( s[0], -1.0 );
     assert_eq!( s[1], -2.0 );
     assert_eq!( s[2], -3.0 );
-    let t = p - zero;
+    let t = p - zero; // Consuming subtraction
     assert_eq!( t.degree().unwrap(), 2 );
     assert_eq!( t[0], 1.0 );
     assert_eq!( t[1], 2.0 );
@@ -274,7 +279,7 @@ fn polynomial_subtraction() {
 fn polynomial_multiplication_zero() {
     let p = Polynomial::new( vec![ 1.0, 2.0, 3.0 ] ); // 1 + 2x + 3x^2
     let zero = Polynomial::empty();
-    let s = zero.clone() * p.clone();
+    let s = &zero * &p;
     match s.degree() {
         Ok( _ ) => assert!( false ),
         Err( _ ) => assert!( true )  // s has degree zero 
@@ -290,7 +295,7 @@ fn polynomial_multiplication_zero() {
 fn polynomial_multiplication_one() {
     let p = Polynomial::new( vec![ 1.0, 2.0, 3.0 ] ); // 1 + 2x + 3x^2
     let one = Polynomial::new( vec![ 1.0 ] ); // 1
-    let s = one.clone() * p.clone();
+    let s = &one * &p;
     assert_eq!( s.degree().unwrap(), 2 );
     assert_eq!( s[0], 1.0 );
     assert_eq!( s[1], 2.0 );

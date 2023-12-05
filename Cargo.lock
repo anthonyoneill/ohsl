@@ -33,7 +33,7 @@ checksum = "7843ec2de400bcbc6a6328c958dc38e5359da6e93e72e37bc5246bf1ae776389"
 
 [[package]]
 name = "ohsl"
-version = "0.9.0"
+version = "0.10.1"
 dependencies = [
  "more-asserts",
  "rand",

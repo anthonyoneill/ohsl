@@ -15,6 +15,7 @@ pub mod newton;
 pub mod mesh2d;
 pub mod sparse_matrix;
 pub mod polynomial;
+pub mod tridiagonal;
 
 // Re-exports
 pub use self::complex::{Complex, Cmplx};
@@ -26,3 +27,4 @@ pub use self::newton::Newton;
 pub use self::mesh2d::Mesh2D;
 pub use self::sparse_matrix::Sparse;
 pub use self::polynomial::Polynomial;
+pub use self::tridiagonal::Tridiagonal;

@@ -39,6 +39,13 @@ impl<T> Vector<T> {
         self.size += 1;
     }
 
+    /// Push a new element onto the front of the vector
+    #[inline]
+    pub fn push_front(&mut self, elem: T ) {
+        self.vec.insert( 0, elem );
+        self.size += 1;
+    }
+
     /// Insert a new element into the Vector at a specified position 
     #[inline]
     pub fn insert(&mut self, pos: usize, new_elem: T ) {

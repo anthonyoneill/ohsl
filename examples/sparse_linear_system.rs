@@ -28,7 +28,7 @@ fn main() {
     let b = Vec64::random( n );
     println!( "  * b^T ={}", b );
     println!( "  * as both dense and sparse linear systems.");
-    let dense_x = a.clone().solve_basic( b.clone() );
+    let dense_x = a.solve_basic( &b );
     println!( "  * The dense system gives the solution vector");
     println!( "  * x^T ={}", dense_x );
     let mut sparse = Sparse::from_triplets( triplets );

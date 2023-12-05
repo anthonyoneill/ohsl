@@ -15,7 +15,7 @@ fn main() {
     let nodes = Vec64::linspace( 0.0, 1.0, 101 );
     let mut mesh = Mesh1D::<f64, f64>::new( nodes.clone(), 2 );
     for i in 0..nodes.size() {
-        let x = nodes[i].clone();
+        let x = nodes[i];
         mesh[i][0] = 2.0 * x;
         mesh[i][1] = x * x;
     }
@@ -36,7 +36,7 @@ fn main() {
     // mesh.output( "./output.txt", 5 );
     // here 5 is the precision of the output values.
     // Similarly a pre-existing file can be read into a mesh using
-    //mesh.read( "./output.txt" );
+    // mesh.read( "./output.txt" );
     
     println!( "--- FINISHED ---" );
 }
