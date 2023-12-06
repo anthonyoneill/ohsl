@@ -202,4 +202,22 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         self.fill_diag( diag );
         self.fill_band( 1, upper );
     }
+
+    /// Fill a row of the matrix with specified elements
+    #[inline]
+    pub fn fill_row(&mut self, row: usize, elem: T ) {
+        if self.rows <= row { panic!( "Matrix range error in fill_row" ); }
+        for j in 0..self.cols {
+            self[row][j] = elem.clone();
+        }
+    }
+
+    /// Fill a column of the matrix with specified elements
+    #[inline]
+    pub fn fill_col(&mut self, col: usize, elem: T ) {
+        if self.cols <= col { panic!( "Matrix range error in fill_col" ); }
+        for i in 0..self.rows {
+            self[i][col] = elem.clone();
+        }
+    }
 }

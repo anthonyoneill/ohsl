@@ -8,6 +8,7 @@ use std::{fmt, fs::File, io::Write};
 pub use crate::traits::{Number, Zero, One};
 pub use crate::complex::Complex;
 
+#[derive(PartialEq)]
 pub struct Vector<T> {
     pub vec: Vec<T>,
     size: usize,
