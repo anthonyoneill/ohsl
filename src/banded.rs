@@ -1,7 +1,7 @@
 use std::fmt;
 use std::ops::{Index, IndexMut, Neg, Add, Sub, Mul, Div};
 use core::ops::{AddAssign, SubAssign, MulAssign, DivAssign};
-use crate::{Matrix, Number};
+use crate::{Matrix, Vector, Number};
 use crate::traits::Signed;
 
 //TODO n = size, m1 = below, m2 = above
@@ -51,7 +51,7 @@ impl<T> Banded<T> {
     }
 }
 
-impl<T: Clone + Copy + Number> Banded<T> {
+impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
     /// Create a new banded matrix of specified size and fill it with a constant value
     #[inline]
     pub fn new( n: usize, m1: usize, m2: usize, value: T ) -> Self {
@@ -86,6 +86,103 @@ impl<T: Clone + Copy + Number> Banded<T> {
             panic!("Banded error: band not in matrix."); 
         }
         self.compact.fill_col( (self.m1 as isize + band) as usize, value );
+    }
+
+    fn decompose(&self, au: &mut Matrix<T>, al: &mut Matrix<T>, index: &mut Vector<usize>, d: &mut T ) {
+        let mm = self.m1 + self.m2 + 1;
+        let mut l = self.m1;
+        for i in 0..self.m1 {
+            for j in self.m1 - i..mm {
+                au[ i ][ j - l ] = au[ i ][ j ];
+            }
+            l -= 1;
+            for j in mm - l - 1..mm {
+                au[ i ][ j ] = T::zero();
+            }
+        }
+        *d = T::one();
+        l = self.m1;
+        for k in 0..self.n {
+            let mut dum = au[ k ][ 0 ];
+            let mut i = k;
+            if l < self.n { l += 1; }
+            for j in k + 1..l {
+                if au[ j ][ 0 ] > dum {
+                    dum = au[ j ][ 0 ];
+                    i = j;
+                }
+            }
+            index[ k ] = i + 1;
+            if dum == T::zero() { au[ k ][ 0 ] = T::zero(); }
+            if i != k {
+                *d = -*d;
+                for j in 0..mm {
+                    au.swap_elem( k, j, i, j )
+                }
+            }
+            for i in k + 1..l {
+                dum = au[ i ][ 0 ] / au[ k ][ 0 ];
+                al[ k ][ i - k - 1 ] = dum;
+                for j in 1..mm {
+                    au[ i ][ j - 1 ] = au[ i ][ j ] - dum * au[ k ][ j ];
+                }
+                au[ i ][ mm - 1 ] = T::zero();
+            }
+        }
+
+    }     
+
+    /// Return the determinant of the matrix
+    #[inline]
+    pub fn det( &self ) -> T {
+        let mut au = self.compact.clone();
+        let mut al = Matrix::new( self.n, self.m1, T::zero() );
+        let mut index = Vector::new( self.n, 0 );
+        let mut d = T::zero();
+        self.decompose( &mut au, &mut al, &mut index, &mut d );
+        let mut dd = d.clone();
+        for i in 0..self.n {
+            dd *= au[ i ][ 0 ];
+        }
+        dd
+    }
+
+    /// Solve the linear system Bx = b where B is the banded matrix and b is a vector
+    /// Return the solution vector x
+    #[inline]
+    pub fn solve( &self, b: &Vector<T> ) -> Vector<T> {
+        if self.n != b.size() { 
+            panic!( "Banded matrix solve error: dimensions do not agree." ); 
+        }
+        // LU decomposition
+        let mut au = self.compact.clone();
+        let mut al = Matrix::new( self.n, self.m1, T::zero() );
+        let mut index = Vector::new( self.n, 0 );
+        let mut d = T::zero();
+        self.decompose( &mut au, &mut al, &mut index, &mut d );
+        // Solve the system
+        let mut x = b.clone();
+        let mm = self.m1 + self.m2 + 1;
+        let mut l = self.m1;
+        for k in 0..self.n {
+            let j = index[ k ] - 1;
+            if j != k { x.swap( k, j ); }
+            if l < self.n { l += 1; }
+            for j in k + 1..l {
+                let xk = x[ k ];
+                x[ j ] -= al[ k ][ j - k - 1 ] * xk;
+            }
+        }
+        l = 1;
+        for i in (0..self.n).rev() {
+            let mut dum = x[ i ].clone();
+            for k in 1..l {
+                dum -= au[ i ][ k ] * x[ k + i ];
+            }
+            x[ i ] = dum / au[ i ][ 0 ];
+            if l < mm { l += 1; }
+        }
+        x
     }
 }
 
@@ -346,4 +443,36 @@ impl<T: Copy + Clone + Number> SubAssign<T> for Banded<T> {
     }
 }
 
-//TODO operators (banded matrix * vector ), solve, determinant
+// Non-consuming matrix-vector multiplication
+impl<T: Copy + Clone + Number> Mul<&Vector<T>> for &Banded<T> {
+    type Output = Vector<T>;
+    /// Multiply a banded matrix by a vector ( matrix * vector )
+    #[inline]
+    fn mul(self, vector: &Vector<T>) -> Self::Output {
+        if self.n != vector.size() { 
+            panic!( "Banded matrix and vector dimensions do not agree (*)." ); 
+        }
+        let mut result = Vector::new( self.n, T::zero() );
+        let n = self.n as isize;
+        let m1 = self.m1 as isize;
+        let m2 = self.m2 as isize;
+        for i in 0..self.n {
+            let k = i as isize - m1;
+            let tmploop = std::cmp::min( m1 + m2 + 1, n - k );
+            for j in std::cmp::max( 0, - k )..tmploop {
+                result[ i ] += self.compact[ i ][ j as usize ] * vector[ (j + k) as usize ];
+            }
+        }
+        result
+    }
+}
+
+// Consuming matrix-vector multiplication
+impl<T: Copy + Clone + Number> Mul<Vector<T>> for Banded<T> {
+    type Output = Vector<T>;
+    /// Multiply a banded matrix by a vector ( matrix * vector )
+    #[inline]
+    fn mul(self, vector: Vector<T>) -> Self::Output {
+        &self * &vector
+    }
+}

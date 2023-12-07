@@ -1,4 +1,4 @@
-use ohsl::Banded;
+use ohsl::{Banded, Vec64, Cmplx, Zero, Vector};
 
 #[test]
 fn empty_constructor() {
@@ -338,4 +338,72 @@ fn constant_subtraction_assignment() {
     assert_eq!( mat[(1,2)], 2.0 );
     assert_eq!( mat[(2,1)], 0.0 );
     assert_eq!( mat[(2,2)], 1.0 );
+}
+
+#[test]
+fn matrix_vector_multiplication() {
+    let mut mat = Banded::<f64>::new( 3, 1, 1, 2.0 );
+    mat.fill_band( 0, 3.0 );
+    mat.fill_band( -1, 2.0 );
+    mat.fill_band( 1, 4.0 );
+    println!("mat = {}", mat);
+    let v = Vec64::new( 3, 1.0 );
+    println!("v = {}", v);
+    let w = &mat * &v; // Non-consuming matrix-vector multiplication
+    assert_eq!( w[0], 7.0 );
+    assert_eq!( w[1], 9.0 );
+    assert_eq!( w[2], 5.0 );
+    let u = Vec64::create( vec![1.0, -1.0, 2.0] );
+    let w2 = mat * u; // Consuming matrix-vector multiplication
+    assert_eq!( w2[0], -1.0 );
+    assert_eq!( w2[1],  7.0 );
+    assert_eq!( w2[2],  4.0 );
+}
+
+#[test]
+fn determinant() {
+    let mut mat = Banded::<f64>::new( 3, 1, 1, 2.0 );
+    mat.fill_band( 0, 3.0 );
+    mat.fill_band( -1, 2.0 );
+    mat.fill_band( 1, 4.0 );
+    assert_eq!( mat.det(), -21.0 );
+}
+
+#[test]
+fn complex_determinant() {
+    let mut mat = Banded::<Cmplx>::new( 3, 1, 1, Cmplx::zero() );
+    mat.fill_band( 0, Cmplx::new( 3.0, 1.0 ) );
+    mat.fill_band( -1, Cmplx::new( 2.0, 0.0 ) );
+    mat.fill_band( 1, Cmplx::new( 4.0, 0.0 ) );
+    assert_eq!( mat.det(), Cmplx::new( -30.0, 10.0 ) );
+}
+
+#[test]
+fn solve() {
+    let mut mat = Banded::<f64>::new( 3, 1, 1, 2.0 );
+    mat.fill_band( 0, 3.0 );
+    mat.fill_band( -1, 2.0 );
+    mat.fill_band( 1, 4.0 );
+    let v = Vec64::new( 3, 1.0 );
+    let w = mat.solve( &v );
+    assert!( (w[0] - (-5.0 / 21.0)).abs() < f64::EPSILON ); 
+    assert!( (w[1] - ( 9.0 / 21.0)).abs() < f64::EPSILON );
+    assert!( (w[2] - ( 1.0 / 21.0)).abs() < f64::EPSILON );
+}
+
+#[test]
+fn complex_solve() {
+    let mut mat = Banded::<Cmplx>::new( 3, 1, 1, Cmplx::zero() );
+    mat.fill_band( 0, Cmplx::new( 3.0, 1.0 ) );
+    mat.fill_band( -1, Cmplx::new( 2.0, 0.0 ) );
+    mat.fill_band( 1, Cmplx::new( 4.0, 0.0 ) );
+    let v = Vector::<Cmplx>::new( 3, Cmplx::new( 1.0, 0.0 ) );
+    let w = mat.solve( &v );
+    let factor = Cmplx::new( 0.1, 0.1 );
+    let w0 = factor * Cmplx::new( -1.0, 0.0 );
+    let w1 = factor * Cmplx::new(  2.0, -1.0 );
+    let w2 = factor * Cmplx::new(  0.0, -1.0 );
+    assert!( (w[0] - w0).abs() < f64::EPSILON ); 
+    assert!( (w[1] - w1).abs() < f64::EPSILON );
+    assert!( (w[2] - w2).abs() < f64::EPSILON );
 }
