@@ -4,26 +4,38 @@ pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
 pub use crate::traits::{Number, Signed, Zero, One};
 
-impl<T: Copy + Neg<Output = T>> Neg for Matrix<T> {
-    type Output = Self;
+// Non-consuming negation
+impl<T: Copy + Neg<Output = T> + Signed> Neg for &Matrix<T> {
+    type Output = Matrix<T>;
     /// Return the unary negation ( unary - ) of each element
     #[inline]
     fn neg(self) -> Self::Output {
-        let mut result = self.clone();
+        let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                result[i][j] = -result[i][j];
+                result[i][j] = -self[i][j];
             }
         }
         result
     }
 }
 
-impl<T: Copy + Number> Add<Matrix<T>> for Matrix<T> {
+// Consuming negation
+impl<T: Copy + Neg<Output = T> + Signed> Neg for Matrix<T> {
     type Output = Self;
+    /// Return the unary negation ( unary - ) of each element
+    #[inline]
+    fn neg(self) -> Self::Output {
+        -&self
+    }
+}
+
+// Non-consuming addition
+impl<T: Copy + Number> Add<&Matrix<T>> for &Matrix<T> {
+    type Output = Matrix<T>;
     /// Add the elements of two matrices together ( binary + )
     #[inline]
-    fn add(self, plus: Self) -> Self::Output {
+    fn add(self, plus: &Matrix<T>) -> Self::Output {
         if self.rows != plus.rows { panic!( "Matrix row dimensions do not agree (+)." ); }
         if self.cols != plus.cols { panic!( "Matrix col dimensions do not agree (+)." ); }
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
@@ -36,11 +48,22 @@ impl<T: Copy + Number> Add<Matrix<T>> for Matrix<T> {
     }
 }
 
-impl<T: Copy + Number> Sub<Matrix<T>> for Matrix<T> {
+// Consuming addition
+impl<T: Copy + Number> Add<Matrix<T>> for Matrix<T> {
     type Output = Self;
+    /// Add the elements of two matrices together ( binary + )
+    #[inline]
+    fn add(self, plus: Self) -> Self::Output {
+        &self + &plus
+    }
+}
+
+// Non-consuming subtraction
+impl<T: Copy + Number> Sub<&Matrix<T>> for &Matrix<T> {
+    type Output = Matrix<T>;
     /// Subtract the elements of one matrix from another ( binary - )
     #[inline]
-    fn sub(self, minus: Self) -> Self::Output {
+    fn sub(self, minus: &Matrix<T>) -> Self::Output {
         if self.rows != minus.rows { panic!( "Matrix row dimensions do not agree (-)." ); }
         if self.cols != minus.cols { panic!( "Matrix col dimensions do not agree (-)." ); }
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
@@ -53,8 +76,19 @@ impl<T: Copy + Number> Sub<Matrix<T>> for Matrix<T> {
     }
 }
 
-impl<T: Copy + Number> Mul<T> for Matrix<T> {
+// Consuming subtraction
+impl<T: Copy + Number> Sub<Matrix<T>> for Matrix<T> {
     type Output = Self;
+    /// Subtract the elements of one matrix from another ( binary - )
+    #[inline]
+    fn sub(self, minus: Self) -> Self::Output {
+        &self - &minus
+    }
+}
+
+// Non-consuming scalar multiplication
+impl<T: Copy + Number> Mul<T> for &Matrix<T> {
+    type Output = Matrix<T>;
     /// Multiply a matrix by a scalar (matrix * scalar)
     #[inline]
     fn mul(self, scalar: T) -> Self::Output {
@@ -65,6 +99,16 @@ impl<T: Copy + Number> Mul<T> for Matrix<T> {
             }
         }
         result
+    }
+}
+
+// Consuming scalar multiplication
+impl<T: Copy + Number> Mul<T> for Matrix<T> {
+    type Output = Self;
+    /// Multiply a matrix by a scalar (matrix * scalar)
+    #[inline]
+    fn mul(self, scalar: T) -> Self::Output {
+        &self * scalar
     }
 }
 
@@ -83,8 +127,9 @@ impl Mul<Matrix<f64>> for f64 {
     }
 }
 
-impl<T: Copy + Number> Div<T> for Matrix<T> {
-    type Output = Self;
+// Non-consuming scalar division
+impl<T: Copy + Number> Div<T> for &Matrix<T> {
+    type Output = Matrix<T>;
     /// Divide a matrix by a scalar (matrix / scalar)
     fn div(self, scalar: T) -> Self::Output {
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
@@ -97,9 +142,19 @@ impl<T: Copy + Number> Div<T> for Matrix<T> {
     }
 }
 
-impl<T: Copy + Number> AddAssign for Matrix<T> {
+// Consuming scalar division
+impl<T: Copy + Number> Div<T> for Matrix<T> {
+    type Output = Self;
+    /// Divide a matrix by a scalar (matrix / scalar)
+    fn div(self, scalar: T) -> Self::Output {
+        &self / scalar
+    }
+}
+
+// Non-consuming addition assignment
+impl<T: Copy + Number> AddAssign<&Matrix<T>> for Matrix<T> {
     /// Add a matrix to a mutable matrix and assign the result ( += )
-    fn add_assign(&mut self, rhs: Self) {
+    fn add_assign(&mut self, rhs: &Self) {
         if self.rows != rhs.rows { panic!( "Matrix row dimensions do not agree (+=)." ); }
         if self.cols != rhs.cols { panic!( "Matrix col dimensions do not agree (+=)." ); }
         for i in 0..self.rows {
@@ -110,9 +165,25 @@ impl<T: Copy + Number> AddAssign for Matrix<T> {
     }
 }
 
-impl<T: Copy + Number> SubAssign for Matrix<T> {
+// Consuming addition assignment
+impl<T: Copy + Number> AddAssign for Matrix<T> {
+    /// Add a matrix to a mutable matrix and assign the result ( += )
+    fn add_assign(&mut self, rhs: Self) {
+        /*if self.rows != rhs.rows { panic!( "Matrix row dimensions do not agree (+=)." ); }
+        if self.cols != rhs.cols { panic!( "Matrix col dimensions do not agree (+=)." ); }
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                self[i][j] += rhs[i][j];
+            }
+        }*/
+        *self += &rhs
+    }
+}
+
+// Non-consuming subtraction assignment
+impl<T: Copy + Number> SubAssign<&Matrix<T>> for Matrix<T> {
     /// Subtract a matrix from a mutable matrix and assign the result ( -= )
-    fn sub_assign(&mut self, rhs: Self) {
+    fn sub_assign(&mut self, rhs: &Self) {
         if self.rows != rhs.rows { panic!( "Matrix row dimensions do not agree (-=)." ); }
         if self.cols != rhs.cols { panic!( "Matrix col dimensions do not agree (-=)." ); }
         for i in 0..self.rows {
@@ -120,6 +191,14 @@ impl<T: Copy + Number> SubAssign for Matrix<T> {
                 self[i][j] -= rhs[i][j];
             }
         }
+    }
+}
+
+// Consuming subtraction assignment
+impl<T: Copy + Number> SubAssign for Matrix<T> {
+    /// Subtract a matrix from a mutable matrix and assign the result ( -= )
+    fn sub_assign(&mut self, rhs: Self) {
+        *self -= &rhs
     }
 }
 

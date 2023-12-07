@@ -9,6 +9,7 @@ pub use crate::traits::{Number, Signed, Zero, One};
 pub use crate::complex::Complex;
 pub use crate::vector::{Vector, Vec64};
 
+#[derive(PartialEq)]
 pub struct Matrix<T> {
     mat: Vec< Vector<T> >,
     rows: usize,

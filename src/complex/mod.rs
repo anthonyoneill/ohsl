@@ -123,6 +123,15 @@ impl<T: Clone + Number> Mul<T> for Complex<T>  {
     }
 }
 
+impl Mul<Complex<f64>> for f64 {
+    type Output = Complex<f64>;
+    /// Allow multiplication on the left by f64 (f64 * complex number)
+    #[inline]
+    fn mul(self, complex: Complex<f64>) -> Self::Output {
+        complex * self
+    }
+}
+
 impl<T: Clone + Number> Div<T> for Complex<T> {
     type Output = Complex<T>;
     /// Divide a complex number by a real scalar 

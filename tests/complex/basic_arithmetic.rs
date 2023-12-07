@@ -50,7 +50,7 @@ fn plus_real() {
     let z = Cmplx::new( 1.0, 2.0 );
     let zans = z + r;
     assert_eq!( zans.real, 2.0 );
-    assert_eq!( zans.imag, 2.0 )
+    assert_eq!( zans.imag, 2.0 );
 }
 
 #[test]
@@ -59,7 +59,7 @@ fn minus_real() {
     let z = Cmplx::new( 1.0, 2.0 );
     let zans = z - r;
     assert_eq!( zans.real, 0.0 );
-    assert_eq!( zans.imag, 2.0 )
+    assert_eq!( zans.imag, 2.0 );
 }
 
 #[test]
@@ -68,7 +68,10 @@ fn multiply_real() {
     let z = Cmplx::new( 1.0, 2.0 );
     let zans = z * r;
     assert_eq!( zans.real, 4.0 );
-    assert_eq!( zans.imag, 8.0 )
+    assert_eq!( zans.imag, 8.0 );
+    let zans = r * z;
+    assert_eq!( zans.real, 4.0 );
+    assert_eq!( zans.imag, 8.0 );
 }
 
 #[test]
@@ -77,5 +80,5 @@ fn divide_real() {
     let z = Cmplx::new( 1.0, 2.0 );
     let zans = z / r;
     assert_eq!( zans.real, 0.25 );
-    assert_eq!( zans.imag, 0.5 )
+    assert_eq!( zans.imag, 0.5 );
 }
