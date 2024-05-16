@@ -1,5 +1,6 @@
 pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
+pub use crate::complex::Cmplx;
 
 impl Matrix<f64> {
     /// Return the matrix one-norm (max absolute column sum)
@@ -74,6 +75,28 @@ impl Matrix<f64> {
             let f_new = func( state.clone() ); 
             state[i] -= delta;
             jac.set_col( i, ( f_new - f.clone() ) / delta );
+        }
+        jac
+    }
+
+    
+}
+
+impl Matrix<Cmplx> {
+    /// Create the Jacobian matrix of a complex vector valued function at a point
+    /// using finite-differences
+    #[inline]
+    pub fn jacobian_cmplx( point: Vector<Cmplx>, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>, delta: f64 ) -> Self {
+        let n = point.size();
+        let f = func( point.clone() );
+        let m = f.size();
+        let mut state = point.clone();
+        let mut jac = Matrix::<Cmplx>::new( m, n, Cmplx::new( 0.0, 0.0 ) );
+        for i in 0..n {
+            state[i] += Cmplx::new( delta, 0.0 );
+            let f_new = func( state.clone() ); 
+            state[i] -= Cmplx::new( delta, 0.0 );
+            jac.set_col( i, ( f_new - f.clone() ) / Cmplx::new( delta, 0.0 ) );
         }
         jac
     }

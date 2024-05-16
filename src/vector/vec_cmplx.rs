@@ -27,3 +27,18 @@ impl<T: Clone + Number> Vector<Complex::<T>> {
         Vector { vec }
     } 
 }
+
+impl Vector<Complex::<f64>> {
+    /// Return the Inf norm: largest absolute value element (p -> infinity)
+    #[inline]
+    pub fn norm_inf(&self) -> f64 {
+        let mut result = self.vec[0].abs();
+        for i in 1..self.size() {
+            if result < self.vec[i].abs() {
+                result = self.vec[i].abs();
+            }
+        }
+        result
+    }
+}
+

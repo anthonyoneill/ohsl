@@ -1,5 +1,5 @@
-use ohsl::vector::Vec64;
-use ohsl::matrix::Mat64;
+use ohsl::vector::{Vec64, Vector};
+use ohsl::matrix::{Mat64, Matrix};
 use ohsl::newton::Newton;
 use ohsl::complex::Cmplx;
 
@@ -111,4 +111,69 @@ fn solve_cmplx() {
     newton.guess( Cmplx::new( -1.0, -1.0 ) );
     let solution = newton.solve( &x_cubed_minus_two );
     assert_eq!( solution.unwrap(), Cmplx::new( -0.6299605249474366, -1.0911236359717214 ) );
+}
+
+fn vecfunc_cmplx( x: Vector<Cmplx> ) -> Vector<Cmplx> {
+    let mut f = Vector::<Cmplx>::new( 2, Cmplx::new( 0.0, 0.0 ) );
+    //f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
+    f[0] = x[0].powf( 3.0 ) + x[1] + Cmplx::new( -1.0, 0.0 );
+    //f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
+    f[1] = x[1].powf( 3.0 ) - x[0] + Cmplx::new( 1.0, 0.0 );
+    /*
+        x^3 + y - 1 = 0,
+        y^3 - x + 1 = 0,
+        (x,y) = (1,0) is the only (real) solution
+    */
+    f
+}
+
+#[test]
+fn jacobian_cmplx() {
+    let point = Vector::<Cmplx>::create( vec![ Cmplx::new( 1.0, 0.0 ), Cmplx::new( 1.0, 0.0 ) ] );
+    let jacobian = Matrix::<Cmplx>::jacobian_cmplx( point, &vecfunc_cmplx, 1.0e-8 );
+    assert_eq!( jacobian.rows(), 2 );
+    assert_eq!( jacobian.cols(), 2 );
+    assert!( ( jacobian[(0,0)] - 3.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(0,1)] - 1.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(1,0)] + 1.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(1,1)] - 3.0 ).abs() < 1.0e-6 );
+}
+
+#[test]
+fn solve_vec_cmplx() {
+    let guess = Vector::<Cmplx>::create( vec![ Cmplx::new( 0.5, 0.0 ), Cmplx::new( 0.25, 0.0 ) ] );
+    let mut newton = Newton::<Vector::<Cmplx>>::new( guess );
+    let solution = newton.solve( &vecfunc_cmplx ).unwrap();
+    assert!( ( solution[0] - 1.0).abs() < 1.0e-8 );
+    assert!( ( solution[1] - 0.0).abs() < 1.0e-8 );
+    newton.guess( Vector::<Cmplx>::create( vec![ Cmplx::new( 1.5, 0.2 ), Cmplx::new( -0.05, -0.5 ) ] ) );
+    let solution = newton.solve( &vecfunc_cmplx ).unwrap();
+    assert!( ( solution[0] - Cmplx::new( 1.045104845532415, 0.17282103284313127 )).abs() < 1.0e-8 );
+    assert!( ( solution[1] - Cmplx::new( -0.047866859044606, -0.561126615525250 )).abs() < 1.0e-8 );
+}
+
+fn jacfunc_cmplx( x: Vector<Cmplx> ) -> Matrix<Cmplx> {
+    let mut j = Matrix::<Cmplx>::new( 2, 2, Cmplx::new( 0.0, 0.0 ) );
+    j[(0,0)] = 3.0 * x[0].powf( 2.0 );
+    j[(0,1)] = Cmplx::new( 1.0, 0.0 );
+    j[(1,0)] = Cmplx::new( -1.0, 0.0 );
+    j[(1,1)] = 3.0 * x[1].powf( 2.0 );
+    /*
+        J = [ 3x^2,  1   
+                -1 , 3y^2 ]
+    */
+    j
+}
+
+#[test]
+fn exact_jacobian_solve_cmplx() {
+    let guess = Vector::<Cmplx>::create( vec![ Cmplx::new( 0.5, 0.0 ), Cmplx::new( 0.25, 0.0 ) ] );
+    let mut newton = Newton::<Vector::<Cmplx>>::new( guess );
+    let solution = newton.solve_jacobian( &vecfunc_cmplx, &jacfunc_cmplx ).unwrap();
+    assert!( ( solution[0] - 1.0).abs() < 1.0e-8 );
+    assert!( ( solution[1] - 0.0).abs() < 1.0e-8 );
+    newton.guess( Vector::<Cmplx>::create( vec![ Cmplx::new( 1.5, 0.2 ), Cmplx::new( -0.05, -0.5 ) ] ) );
+    let solution = newton.solve( &vecfunc_cmplx ).unwrap();
+    assert!( ( solution[0] - Cmplx::new( 1.045104845532415, 0.17282103284313127 )).abs() < 1.0e-8 );
+    assert!( ( solution[1] - Cmplx::new( -0.047866859044606, -0.561126615525250 )).abs() < 1.0e-8 );
 }

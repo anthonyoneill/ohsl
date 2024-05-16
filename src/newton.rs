@@ -127,5 +127,41 @@ impl Newton<Vec64> {
         }
         Err( current )
     }
+}
 
+impl Newton<Vector<Cmplx>> {
+    /// Solve the vector equation via Newton iteration 
+    #[inline] 
+    pub fn solve(&self, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>) -> Result<Vector<Cmplx>, Vector<Cmplx>> {
+        let mut current: Vector<Cmplx> = self.guess.clone();
+        for _ in 0..self.max_iter {
+            let f: Vector<Cmplx> = func( current.clone() );
+            let max_residual = f.norm_inf();
+            let mut j = Matrix::jacobian_cmplx( current.clone(), func, self.delta );
+            let dx: Vector<Cmplx> = j.solve_basic( &f );
+            current -= dx;
+            if max_residual <= self.tol {
+                return Ok( current )
+            }
+        }
+        Err( current )
+    }
+
+    /// Solve the vector equation via Newton iteration using the exact Jacobian
+    #[inline] 
+    pub fn solve_jacobian(&self, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>, 
+            jac: &dyn Fn(Vector<Cmplx>) -> Matrix<Cmplx> ) -> Result<Vector<Cmplx>, Vector<Cmplx>> {
+        let mut current: Vector<Cmplx> = self.guess.clone();
+        for _ in 0..self.max_iter {
+            let f: Vector<Cmplx> = func( current.clone() );
+            let max_residual = f.norm_inf();
+            let mut j: Matrix<Cmplx> = jac( current.clone() ); 
+            let dx: Vector<Cmplx> = j.solve_basic( &f );
+            current -= dx;
+            if max_residual <= self.tol {
+                return Ok( current )
+            }
+        }
+        Err( current )
+    }
 }
