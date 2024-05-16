@@ -12,9 +12,9 @@ fn main() {
     println!( "------------------ Linear system ------------------" );
     println!( "  * Solving the linear system Ax = b, for x, where" );
     let mut a = Mat64::new( 3, 3, 0.0 );
-    a[0][0] = 1.0; a[0][1] = 1.0; a[0][2] =   1.0;
-    a[1][0] = 0.0; a[1][1] = 2.0; a[1][2] =   5.0;
-    a[2][0] = 2.0; a[2][1] = 5.0; a[2][2] = - 1.0;
+    a[(0,0)] = 1.0; a[(0,1)] = 1.0; a[(0,2)] =   1.0;
+    a[(1,0)] = 0.0; a[(1,1)] = 2.0; a[(1,2)] =   5.0;
+    a[(2,0)] = 2.0; a[(2,1)] = 5.0; a[(2,2)] = - 1.0;
     println!( "  * A ={}", a );
     let b = Vec64::create( vec![ 6.0, -4.0, 27.0 ] ); 
     println!( "  * b^T ={}", b );
@@ -24,8 +24,8 @@ fn main() {
     println!( "---------------------------------------------------" );
     println!( "  * Lets solve the complex linear system Cy = d where" );
     let mut c = Matrix::<Cmplx>::new( 2, 2, Cmplx::new( 1.0, 1.0 ) );
-    c[0][1] = Cmplx::new( -1.0, 0.0 );
-    c[1][0] = Cmplx::new( 1.0, -1.0 );
+    c[(0,1)] = Cmplx::new( -1.0, 0.0 );
+    c[(1,0)] = Cmplx::new( 1.0, -1.0 );
     println!( "  * C ={}", c );
     let mut d = Vector::<Cmplx>::new( 2, Cmplx::new( 0.0, 1.0 ) );
     d[1] = Cmplx::new( 1.0, 0.0 );

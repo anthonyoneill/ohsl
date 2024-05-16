@@ -9,7 +9,8 @@ impl Matrix<f64> {
         for j in 0..self.cols {
             let mut sum: f64 = 0.0;
             for i in 0..self.rows {
-                sum += self[i][j].abs()
+                //sum += self[i][j].abs()
+                sum += self[(i,j)].abs();
             }
             result = result.max( sum )
         }
@@ -23,7 +24,8 @@ impl Matrix<f64> {
         for i in 0..self.rows {
             let mut sum: f64 = 0.0;
             for j in 0..self.cols {
-                sum += self[i][j].abs()
+                //sum += self[i][j].abs()
+                sum += self[(i,j)].abs();
             }
             result = result.max( sum )
         }
@@ -36,7 +38,8 @@ impl Matrix<f64> {
         let mut sum: f64 = 0.0;
         for i in 0..self.rows {
             for j in 0..self.cols {
-                sum += f64::powf( self[i][j].abs(), p );
+                //sum += f64::powf( self[i][j].abs(), p );
+                sum += f64::powf( self[(i,j)].abs(), p );
             }
         }
         f64::powf( sum, 1.0/p )
@@ -54,7 +57,8 @@ impl Matrix<f64> {
         let mut result: f64 = 0.0;
         for i in 0..self.rows {
             for j in 0..self.cols {
-                result = result.max( self[i][j].abs() );
+                //result = result.max( self[i][j].abs() );
+                result = result.max( self[(i,j)].abs() );
             }
         }
         result

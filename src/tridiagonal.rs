@@ -141,17 +141,25 @@ impl<T: Clone + Copy + Zero + Number> Tridiagonal<T> {
         let mut dense = Matrix::<T>::new( self.n, self.n, T::zero() );
         if self.n == 0 { panic!("Tridiagonal error: zero size matrix."); }
         if self.n == 1 {
-            dense[0][0] = self.main[0];
+            //dense[0][0] = self.main[0];
+            dense[(0,0)] = self.main[0];
         } else {
-            dense[0][0] = self.main[0];
-            dense[0][1] = self.sup[0];
+            //dense[0][0] = self.main[0];
+            dense[(0,0)] = self.main[0];
+            //dense[0][1] = self.sup[0];
+            dense[(0,1)] = self.sup[0];
             for i in 1..self.n - 1 {
-                dense[i][i - 1] = self.sub[i - 1];
-                dense[i][i] = self.main[i];
-                dense[i][i + 1] = self.sup[i];
+                //dense[i][i - 1] = self.sub[i - 1];
+                dense[(i,i-1)] = self.sub[i - 1];
+                //dense[i][i] = self.main[i];
+                dense[(i,i)] = self.main[i];
+                //dense[i][i + 1] = self.sup[i];
+                dense[(i,i+1)] = self.sup[i];
             }
-            dense[self.n - 1][self.n - 2] = self.sub[self.n - 2];
-            dense[self.n - 1][self.n - 1] = self.main[self.n - 1];
+            //dense[self.n - 1][self.n - 2] = self.sub[self.n - 2];
+            dense[(self.n - 1, self.n - 2)] = self.sub[self.n - 2];
+            //dense[self.n - 1][self.n - 1] = self.main[self.n - 1];
+            dense[(self.n - 1, self.n - 1)] = self.main[self.n - 1];
         }
         dense
     }

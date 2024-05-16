@@ -58,10 +58,10 @@ fn jacobian() {
     let jacobian = Mat64::jacobian( point, &vecfunc, 1.0e-8 );
     assert_eq!( jacobian.rows(), 2 );
     assert_eq!( jacobian.cols(), 2 );
-    assert!( ( jacobian[0][0] - 3.0 ).abs() < 1.0e-6 );
-    assert!( ( jacobian[0][1] - 1.0 ).abs() < 1.0e-6 );
-    assert!( ( jacobian[1][0] + 1.0 ).abs() < 1.0e-6 );
-    assert!( ( jacobian[1][1] - 3.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(0,0)] - 3.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(0,1)] - 1.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(1,0)] + 1.0 ).abs() < 1.0e-6 );
+    assert!( ( jacobian[(1,1)] - 3.0 ).abs() < 1.0e-6 );
 }
 
 #[test]
@@ -75,10 +75,10 @@ fn solve_vec64() {
 
 fn jacfunc( x: Vec64 ) -> Mat64 {
     let mut j = Mat64::new( 2, 2, 0.0 );
-    j[0][0] = 3.0 * f64::powf( x[0], 2.0 );
-    j[0][1] = 1.0;
-    j[1][0] = -1.0;
-    j[1][1] = 3.0 * f64::powf( x[1], 2.0 );
+    j[(0,0)] = 3.0 * f64::powf( x[0], 2.0 );
+    j[(0,1)] = 1.0;
+    j[(1,0)] = -1.0;
+    j[(1,1)] = 3.0 * f64::powf( x[1], 2.0 );
     /*
         J = [ 3x^2,  1   
                 -1 , 3y^2 ]

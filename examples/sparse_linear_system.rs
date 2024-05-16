@@ -13,14 +13,14 @@ fn main() {
     let mut a = Mat64::new( n, n, 0.0 );
     let mut triplets = Vec::new();
     for i in 0..n {
-        a[i][i] = 2.0;
+        a[(i,i)] = 2.0;
         triplets.push( ( i, i, 2.0 ) );
         if i > 0 {
-            a[ i - 1 ][ i ] = 1.0;
+            a[( i - 1 , i )] = 1.0;
             triplets.push( ( i - 1, i, 1.0 ) );
         }
         if i < n - 1 {
-            a[ i + 1 ][ i ] = 1.0;
+            a[( i + 1 , i )] = 1.0;
             triplets.push( ( i + 1, i, 1.0 ) );
         }
     }

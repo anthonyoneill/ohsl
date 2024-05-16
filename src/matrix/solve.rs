@@ -10,8 +10,10 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
         let mut max_index: usize = 0;
         let mut max = T::zero();
         for i in start_row..self.rows {
-            if max < self[ i ][ col ].abs() {
-                max = self[ i ][ col ].abs();
+            //if max < self[ i ][ col ].abs() {
+            if max < self[(i,col)].abs() {
+                //max = self[ i ][ col ].abs();
+                max = self[(i,col)].abs();
                 max_index = i;
             }
         }
@@ -21,14 +23,17 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
     #[inline]
     fn backsolve(&self, x: &mut Vector<T> ) {
         let last = self.rows - 1;
-        x[ last ] = x[ last ]/ self[ last ][ last ];
+        //x[ last ] = x[ last ]/ self[ last ][ last ];
+        x[ last ] = x[ last ] / self[(last,last)];
         for n in 2..self.rows+1 {
             let k = self.rows - n;
             for j in self.rows-n+1..self.rows {
                 let xj = x[ j ];
-                x[ k ] -= self[ k ][ j ] * xj;
+                //x[ k ] -= self[ k ][ j ] * xj;
+                x[ k ] -= self[(k,j)] * xj;
             }
-            x[ k ] /= self[ k ][ k ];
+            //x[ k ] /= self[ k ][ k ];
+            x[ k ] /= self[(k,k)];
         }
     }
 
@@ -44,10 +49,13 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
         for k in 0..self.rows-1 {
             self.partial_pivot( x, k );
             for i in k+1..self.rows {
-                let elem = self[ i ][ k ] / self[ k ][ k ];
+                //let elem = self[ i ][ k ] / self[ k ][ k ];
+                let elem = self[(i,k)] / self[(k,k)];
                 for j in k..self.rows {
-                    let kj = self[ k ][ j ];
-                    self[ i ][ j ] -= elem * kj;
+                    //let kj = self[ k ][ j ];
+                    let kj = self[(k,j)];
+                    //self[ i ][ j ] -= elem * kj;
+                    self[(i,j)] -= elem * kj;
                 }
                 let xk = x[ k ];
                 x[ i ] -= elem * xk;
@@ -79,7 +87,8 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
             let mut max_a = T::zero();
             let mut imax = i;
             for k in i..self.rows() {
-                let abs_a = self[ k ][ i ].abs();
+                //let abs_a = self[ k ][ i ].abs();
+                let abs_a = self[(k,i)].abs();
                 if abs_a > max_a {
                     max_a = abs_a;
                     imax = k;
@@ -92,12 +101,17 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
                 pivots += 1;
             } 
             for j in i+1..self.rows() {
-                let ii = self[ i ][ i ];
-                self[ j ][ i ] /= ii;
+                //let ii = self[ i ][ i ];
+                let ii = self[(i,i)];
+                //self[ j ][ i ] /= ii;
+                self[(j,i)] /= ii;
                 for k in i+1..self.rows() { 
-                    let ji = self[ j ][ i ];
-                    let ik = self[ i ][ k ];
-                    self[ j ][ k ] -= ji * ik;
+                    //let ji = self[ j ][ i ];
+                    let ji = self[(j,i)];
+                    //let ik = self[ i ][ k ];
+                    let ik = self[(i,k)];
+                    //self[ j ][ k ] -= ji * ik;
+                    self[(j,k)] -= ji * ik;
                 }
             }
 
@@ -118,7 +132,8 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
         for i in 0..self.rows() {
             for k in 0..i {
                 let xk = x[ k ];
-                x[ i ] -= self[ i ][ k ] * xk;
+                //x[ i ] -= self[ i ][ k ] * xk;
+                x[ i ] -= self[(i,k)] * xk;
             }
         }
         self.backsolve( &mut x );
@@ -132,7 +147,8 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
         let mut temp = self.clone();
         let ( pivots, _permutation ) = temp.lu_decomp_in_place();
         for i in 0..self.rows() {
-            det *= temp.mat[ i ][ i ];
+            //det *= temp.mat[ i ][ i ];
+            det *= temp[(i,i)];
         }
         if pivots % 2 == 0 { det } else { - det }
     }
@@ -146,17 +162,22 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
         for j in 0..self.rows() {
             for i in 0..self.rows() {
                 for k in 0..i {
-                    let inv_kj = inv.mat[ k ][ j ];
-                    inv.mat[ i ][ j ] -=  lu.mat[ i ][ k ] * inv_kj;
+                    //let inv_kj = inv.mat[ k ][ j ];
+                    let inv_kj = inv[(k,j)];
+                    //inv.mat[ i ][ j ] -=  lu.mat[ i ][ k ] * inv_kj;
+                    inv[(i,j)] -= lu[(i,k)] * inv_kj;
                 }
             }
 
             for i in (0..self.rows()).rev() {
                 for k in i+1..self.rows() {
-                    let inv_kj = inv.mat[ k ][ j ];
-                    inv.mat[ i ][ j ] -= lu.mat[ i ][ k ] * inv_kj;
+                    //let inv_kj = inv.mat[ k ][ j ];
+                    let inv_kj = inv[(k,j)];
+                    //inv.mat[ i ][ j ] -= lu.mat[ i ][ k ] * inv_kj;
+                    inv[(i,j)] -= lu[(i,k)] * inv_kj;
                 }
-                inv.mat[ i ][ j ] /= lu.mat[ i ][ i ];
+                //inv.mat[ i ][ j ] /= lu.mat[ i ][ i ];
+                inv[(i,j)] /= lu[(i,i)];
             }
         }
         inv
