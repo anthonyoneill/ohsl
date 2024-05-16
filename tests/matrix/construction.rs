@@ -1,5 +1,4 @@
 use ohsl::matrix::Matrix;
-use ohsl::vector::Vector;
 
 #[test]
 fn unspecified_size() {
@@ -20,21 +19,6 @@ fn specified_size() {
     m[(0,0)] = 7;
     assert_eq!( m[(0,0)], 7 );
 }
-
-/*#[test]
-fn create() {
-    let v1 = Vector::<i32>::new( 3, 3 );
-    let v2 = Vector::<i32>::new( 3, 7 );
-    let mut vec = Vec::new();
-    vec.push( v1 );
-    vec.push( v2 );
-    let m = Matrix::<i32>::create( vec );
-    assert_eq!( m[(0,0)], 3 );
-    assert_eq!( m[1][2], 7 );
-    assert_eq!( m.rows(), 2 );
-    assert_eq!( m.cols(), 3 );
-    assert_eq!( m.numel(), 6 );
-}*/
 
 #[test]
 fn clone() {

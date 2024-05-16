@@ -4,23 +4,6 @@ pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
 pub use crate::traits::{Number, Signed, Zero, One};
 
-/*impl<T> Index<usize> for Matrix<T> {
-    type Output = Vector<T>;
-    /// Indexing operator [] (read only)
-    #[inline]
-    fn index<'a>(&'a self, index: usize ) -> &'a Vector<T> {
-        &self.mat[ index ]
-    }
-}
-
-impl<T> IndexMut<usize> for Matrix<T> {
-    /// Indexing operator [] (read/write)
-    #[inline]
-    fn index_mut(&mut self, index: usize ) -> &mut Vector<T> {
-        &mut self.mat[ index ] 
-    }
-}*/
-
 impl<T> Index<(usize, usize)> for Matrix<T> {
     type Output = T;
     /// Indexing operator [] (read only)
@@ -49,26 +32,10 @@ impl<T> Matrix<T> {
 }
 
 impl<T: Clone + Copy + Number> Matrix<T> {
-    /// Get the (i,j)-th element of the matrix
-    /*#[inline]
-    pub fn get(&self, i: usize, j: usize ) -> T {
-        if self.rows <= i || self.cols <= j { panic!( "Matrix range error in get" ); }
-        self.mat[ i * self.cols + j ]
-    }
-
-    /// Set the (i,j)-th element of the matrix
-    #[inline]
-    pub fn set(&mut self, i: usize, j: usize, elem: T ) {
-        if self.rows <= i || self.cols <= j { panic!( "Matrix range error in set" ); }
-        self.mat[ i * self.cols + j ] = elem;
-    }*/
-
-
     /// Get a row of the matrix as a vector
     #[inline]
     pub fn get_row(&self, row: usize ) -> Vector<T> {
         if self.rows <= row { panic!( "Matrix range error in get_row" ); }
-        //self.mat[ row ].clone()
         let mut result = Vector::<T>::new( self.cols, T::zero() );
         for j in 0..self.cols {
             result[ j ] = self.mat[ row * self.cols + j ];
@@ -82,7 +49,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         if self.rows <= col { panic!( "Matrix range error in get_col" ); }
         let mut result = Vector::<T>::new( self.rows, T::zero() );
         for i in 0..self.rows {
-            //result[ i ] = self[i][col]
             result[ i ] = self.mat[ i * self.cols + col ];
         }
         result
@@ -93,7 +59,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     pub fn set_row(&mut self, row: usize, vec: Vector<T> ) {
         if vec.size() != self.cols { panic!( "Matrix size error in set_row" ); }
         if self.rows <= row { panic!( "Matrix range error in set_row" ); }
-        //self[ row ] = vec;
         for j in 0..self.cols {
             self.mat[ row * self.cols + j ] = vec[ j ];
         }
@@ -105,10 +70,7 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         if vec.size() != self.rows { panic!( "Matrix size error in set_col" ); }
         if self.rows <= col { panic!( "Matrix range error in set_col" ); }
         for i in 0..self.rows {
-            //self[i][col] = vec[i];
             self[(i, col)] = vec[ i ];
-            //self.mat[ i * self.cols + col ] = vec[ i ];
-            //self.set( i, col, vec[ i ] );
         }
     }
 
@@ -116,7 +78,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     #[inline]
     pub fn delete_row(&mut self, row: usize ) {
         if self.rows <= row { panic!( "Matrix range error in delete_row" ); }
-        //self.mat.remove( row );
         self.mat.drain( row * self.cols..(row+1) * self.cols );
         self.rows -= 1;
     }
@@ -127,7 +88,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         if vec.size() != self.cols { panic!( "Matrix dimensions do not agree in multiply." ); }
         let mut result = Vector::<T>::empty();
         for row in 0..self.rows {
-           //result.push( self[row].dot( vec ) );
            result.push( self.get_row( row ).dot( vec ) );
         }
         result
@@ -138,7 +98,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     pub fn eye( size: usize ) -> Self {
         let mut identity = Matrix::<T>::new( size, size, T::zero() ); 
         for i in 0..size {
-            //identity[i][i] = T::one();
             identity[(i, i)] = T::one();
         }
         identity
@@ -152,7 +111,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         for i in 0..n_rows {
             for j in 0..n_cols {
                 if i < temp.rows() && j < temp.cols() {
-                    //self[i][j] = temp[i][j].clone();
                     self[(i, j)] = temp[(i, j)].clone();
                 }
             }
@@ -165,27 +123,12 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         if self.rows == self.cols {
             for i in 0..self.rows {
                 for j in i+1..self.cols {
-                    //let mut temp = self[i][j].clone();
                     let mut temp = self[(i,j)];
-                    //mem::swap( &mut self[j][i], &mut temp );
                     mem::swap( &mut self[(j,i)], &mut temp );
-                    //self[i][j] = temp;
                     self[(i,j)] = temp;
                 }
             }
         } else {
-            /*let row = Vector::<T>::new( self.rows, T::zero() );
-            let mut temp = Vec::new();
-            for _i in 0..self.cols {
-                temp.push( row.clone() );
-            }
-            for i in 0..self.rows {
-                for j in 0..self.cols {
-                    temp[j][i] = self[i][j].clone();
-                }
-            }
-            self.mat = temp;
-            mem::swap( &mut self.rows, &mut self.cols );*/
             let mut temp = Vec::with_capacity( self.rows * self.cols );
             for j in 0..self.cols {
                 for i in 0..self.rows {
@@ -209,19 +152,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     #[inline]
     pub fn swap_rows(&mut self, row_1: usize, row_2: usize ) {
         if self.rows <= row_1 || self.rows <= row_2 { panic!( "Matrix swap row range error." ); } 
-        /*let mut temp = self.mat[ row_1 ].clone();
-        mem::swap( &mut self.mat[ row_2 ], &mut temp );
-        self.mat[ row_1 ] = temp;*/
-        /*let mut temp = Vec::with_capacity( self.cols );
-        for j in 0..self.cols {
-            temp.push( self[(row_1, j)] );
-        }
-        for j in 0..self.cols {
-            self[(row_1, j)] = self[(row_2, j)];
-        }
-        for j in 0..self.cols {
-            self[(row_2, j)] = temp[j];
-        }*/
         for j in 0..self.cols {
             self.swap_elem( row_1, j, row_2, j );
         }
@@ -230,11 +160,8 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     /// Swap two elements of the matrix 
     #[inline]
     pub fn swap_elem(&mut self, row_1: usize, col_1: usize, row_2: usize, col_2: usize ) {
-        //let mut temp = self[row_1][col_1].clone();
         let mut temp = self[(row_1,col_1)].clone();
-        //mem::swap( &mut self[row_2][col_2], &mut temp );
         mem::swap( &mut self[(row_2,col_2)], &mut temp );
-        //self[row_1][col_1] = temp;
         self[(row_1, col_1)] = temp;
     }
 
@@ -243,7 +170,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     pub fn fill(&mut self, elem: T ) {
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] = elem.clone();
                 self[(i, j)] = elem.clone();
             }
         }
@@ -254,7 +180,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     pub fn fill_diag(&mut self, elem: T ) {
         let n: usize = if self.cols < self.rows { self.cols } else { self.rows };
         for i in 0..n {
-            //self[i][i] = elem.clone();
             self[(i, i)] = elem.clone();
         }
         
@@ -267,7 +192,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
         for row in 0..self.rows {
             let i = (row as isize) + offset; 
             if (i as usize) < self.cols &&  i >= 0 {
-                //self[ row ][ i as usize ] = elem.clone();
                 self[(row, i as usize)] = elem.clone();
             } 
         }
@@ -286,7 +210,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     pub fn fill_row(&mut self, row: usize, elem: T ) {
         if self.rows <= row { panic!( "Matrix range error in fill_row" ); }
         for j in 0..self.cols {
-            //self[row][j] = elem.clone();
             self[(row, j)] = elem.clone();
         }
     }
@@ -296,7 +219,6 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     pub fn fill_col(&mut self, col: usize, elem: T ) {
         if self.cols <= col { panic!( "Matrix range error in fill_col" ); }
         for i in 0..self.rows {
-            //self[i][col] = elem.clone();
             self[(i, col)] = elem.clone();
         }
     }

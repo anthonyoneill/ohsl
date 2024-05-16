@@ -13,7 +13,6 @@ impl<T: Copy + Neg<Output = T> + Signed> Neg for &Matrix<T> {
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                //result[i][j] = -self[i][j];
                 result[(i,j)] = -self[(i,j)];
             }
         }
@@ -42,7 +41,6 @@ impl<T: Copy + Number> Add<&Matrix<T>> for &Matrix<T> {
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                //result[i][j] = self[i][j] + plus[i][j];
                 result[(i,j)] = self[(i,j)] + plus[(i,j)];
             }
         }
@@ -71,7 +69,6 @@ impl<T: Copy + Number> Sub<&Matrix<T>> for &Matrix<T> {
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                //result[i][j] = self[i][j] - minus[i][j];
                 result[(i,j)] = self[(i,j)] - minus[(i,j)];
             }
         }
@@ -98,7 +95,6 @@ impl<T: Copy + Number> Mul<T> for &Matrix<T> {
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                //result[i][j] = self[i][j] * scalar;
                 result[(i,j)] = self[(i,j)] * scalar;
             }
         }
@@ -124,7 +120,6 @@ impl Mul<Matrix<f64>> for f64 {
         let mut result = Matrix::<f64>::new( matrix.rows(), matrix.cols(), 0.0 );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                //result[i][j] = matrix[i][j] * self.clone();
                 result[(i,j)] = matrix[(i,j)] * self.clone();
             }
         }
@@ -140,7 +135,6 @@ impl<T: Copy + Number> Div<T> for &Matrix<T> {
         let mut result = Matrix::<T>::new( self.rows(), self.cols(), T::zero() );
         for i in 0..result.rows() {
             for j in 0..result.cols() {
-                //result[i][j] = self[i][j] / scalar;
                 result[(i,j)] = self[(i,j)] / scalar;
             }
         }
@@ -165,7 +159,6 @@ impl<T: Copy + Number> AddAssign<&Matrix<T>> for Matrix<T> {
         if self.cols != rhs.cols { panic!( "Matrix col dimensions do not agree (+=)." ); }
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] += rhs[i][j];
                 self[(i,j)] += rhs[(i,j)];
             }
         }
@@ -176,13 +169,6 @@ impl<T: Copy + Number> AddAssign<&Matrix<T>> for Matrix<T> {
 impl<T: Copy + Number> AddAssign for Matrix<T> {
     /// Add a matrix to a mutable matrix and assign the result ( += )
     fn add_assign(&mut self, rhs: Self) {
-        /*if self.rows != rhs.rows { panic!( "Matrix row dimensions do not agree (+=)." ); }
-        if self.cols != rhs.cols { panic!( "Matrix col dimensions do not agree (+=)." ); }
-        for i in 0..self.rows {
-            for j in 0..self.cols {
-                self[i][j] += rhs[i][j];
-            }
-        }*/
         *self += &rhs
     }
 }
@@ -195,7 +181,6 @@ impl<T: Copy + Number> SubAssign<&Matrix<T>> for Matrix<T> {
         if self.cols != rhs.cols { panic!( "Matrix col dimensions do not agree (-=)." ); }
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] -= rhs[i][j];
                 self[(i,j)] -= rhs[(i,j)];
             }
         }
@@ -215,7 +200,6 @@ impl<T: Copy + Number> MulAssign<T> for Matrix<T> {
     fn mul_assign(&mut self, rhs: T) {
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] *= rhs;
                 self[(i,j)] *= rhs;
             }
         }
@@ -227,7 +211,6 @@ impl<T: Copy + Number> DivAssign<T> for Matrix<T> {
     fn div_assign(&mut self, rhs: T) {
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] /= rhs;
                 self[(i,j)] /= rhs;
             }
         }
@@ -239,7 +222,6 @@ impl<T: Copy + Number> AddAssign<T> for Matrix<T> {
     fn add_assign(&mut self, rhs: T) {
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] += rhs;
                 self[(i,j)] += rhs;
             }
         }
@@ -251,7 +233,6 @@ impl<T: Copy + Number> SubAssign<T> for Matrix<T> {
     fn sub_assign(&mut self, rhs: T) {
         for i in 0..self.rows {
             for j in 0..self.cols {
-                //self[i][j] -= rhs;
                 self[(i,j)] -= rhs;
             }
         }
