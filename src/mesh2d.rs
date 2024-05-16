@@ -121,7 +121,8 @@ impl<T: Clone + Number> Mesh2D<T> {
         let mut m = Matrix::<T>::new( self.nx, self.ny, T::zero() );
         for i in 0..self.nx {
             for j in 0..self.ny {
-                m[i][j] = self.vars[ i * self.ny + j ][ var ].clone();
+                //m[i][j] = self.vars[ i * self.ny + j ][ var ].clone();
+                m[(i,j)] = self.vars[ i * self.ny + j ][ var ].clone();
             }
         }
         m

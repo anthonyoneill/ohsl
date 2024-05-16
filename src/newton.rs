@@ -1,5 +1,5 @@
 pub use crate::traits::{Number, Signed, Zero, One};
-pub use crate::complex::Complex;
+pub use crate::complex::Cmplx;
 pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
 
@@ -73,6 +73,25 @@ impl Newton<f64> {
     }
 }
 
+impl Newton<Cmplx> {
+    /// Solve the equation via Newton iteration 
+    #[inline]
+    pub fn solve(&self, func: &dyn Fn(Cmplx) -> Cmplx ) -> Result<Cmplx, Cmplx> {
+        let mut current: Cmplx = self.guess;
+        for _ in 0..self.max_iter {
+            let deriv = ( func( current + Cmplx::new(self.delta, 0.0) ) - 
+                          func( current - Cmplx::new(self.delta, 0.0) ) ) / ( 2.0 * self.delta );
+            println!("current: {}, deriv: {}", current, deriv);
+            let dx = func(current) / deriv;
+            current -= dx;
+            if dx.abs() <= self.tol {
+                return Ok( current );
+            }
+        }
+        Err( current ) 
+    }
+}
+
 impl Newton<Vec64> {
     /// Solve the vector equation via Newton iteration 
     #[inline] 
@@ -108,5 +127,41 @@ impl Newton<Vec64> {
         }
         Err( current )
     }
+}
 
+impl Newton<Vector<Cmplx>> {
+    /// Solve the vector equation via Newton iteration 
+    #[inline] 
+    pub fn solve(&self, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>) -> Result<Vector<Cmplx>, Vector<Cmplx>> {
+        let mut current: Vector<Cmplx> = self.guess.clone();
+        for _ in 0..self.max_iter {
+            let f: Vector<Cmplx> = func( current.clone() );
+            let max_residual = f.norm_inf();
+            let mut j = Matrix::jacobian_cmplx( current.clone(), func, self.delta );
+            let dx: Vector<Cmplx> = j.solve_basic( &f );
+            current -= dx;
+            if max_residual <= self.tol {
+                return Ok( current )
+            }
+        }
+        Err( current )
+    }
+
+    /// Solve the vector equation via Newton iteration using the exact Jacobian
+    #[inline] 
+    pub fn solve_jacobian(&self, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>, 
+            jac: &dyn Fn(Vector<Cmplx>) -> Matrix<Cmplx> ) -> Result<Vector<Cmplx>, Vector<Cmplx>> {
+        let mut current: Vector<Cmplx> = self.guess.clone();
+        for _ in 0..self.max_iter {
+            let f: Vector<Cmplx> = func( current.clone() );
+            let max_residual = f.norm_inf();
+            let mut j: Matrix<Cmplx> = jac( current.clone() ); 
+            let dx: Vector<Cmplx> = j.solve_basic( &f );
+            current -= dx;
+            if max_residual <= self.tol {
+                return Ok( current )
+            }
+        }
+        Err( current )
+    }
 }

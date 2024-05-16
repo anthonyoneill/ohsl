@@ -23,7 +23,6 @@ impl<T> Vector<T> {
     #[inline]
     pub fn clear(&mut self) {
         self.vec.clear();
-        self.size = 0;
     }
 
     /// Swap elements two elements in the vector 
@@ -36,28 +35,24 @@ impl<T> Vector<T> {
     #[inline]
     pub fn push(&mut self, elem: T ) {
         self.vec.push( elem );
-        self.size += 1;
     }
 
     /// Push a new element onto the front of the vector
     #[inline]
     pub fn push_front(&mut self, elem: T ) {
         self.vec.insert( 0, elem );
-        self.size += 1;
     }
 
     /// Insert a new element into the Vector at a specified position 
     #[inline]
     pub fn insert(&mut self, pos: usize, new_elem: T ) {
         self.vec.insert( pos, new_elem );
-        self.size += 1;
     }
 
     /// Remove the last element from the vector and return it
     #[inline]
     pub fn pop(&mut self) -> T {
         let result = self.vec.pop();
-        self.size -= 1;
         result.unwrap()
     }
 }

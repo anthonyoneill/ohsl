@@ -11,7 +11,6 @@ pub use crate::complex::Complex;
 #[derive(PartialEq)]
 pub struct Vector<T> {
     pub vec: Vec<T>,
-    size: usize,
 }
 
 pub type Vec64 = Vector<f64>;
@@ -21,21 +20,19 @@ impl<T> Vector<T> {
     #[inline]
     pub const fn empty() -> Self {
         let vec = Vec::<T>::new();
-        let size = 0;
-        Vector { vec, size }
+        Vector { vec }
     }
 
     /// Create a vector from an std::vec::Vec
     #[inline]
     pub fn create( vec: Vec<T> ) -> Self {
-        let size = vec.len();
-        Vector { vec, size }
+        Vector { vec }
     }
 
     /// Return the size of the vector 
     #[inline]
     pub fn size(&self) -> usize {
-        self.size
+        self.vec.len()
     }
 }
 
@@ -44,7 +41,7 @@ impl<T: Clone> Vector<T> {
     #[inline]
     pub fn new( size: usize, elem: T ) -> Self {
         let vec = vec![ elem; size ];
-        Vector { vec, size }
+        Vector { vec }
     }
 }
 
@@ -53,14 +50,14 @@ impl<T: Clone + Number> Vector<T> {
     #[inline]
     pub fn zeros( size: usize ) -> Self {
         let vec = vec![ T::zero(); size ];
-        Vector{ vec, size }
+        Vector{ vec }
     }
 
     /// Create a vector of ones
     #[inline]
     pub fn ones( size: usize ) -> Self {
         let vec = vec![ T::one(); size ];
-        Vector{ vec, size }
+        Vector{ vec }
     }
 }
 
@@ -77,7 +74,7 @@ impl<T: fmt::Display> Vector<T> {
     #[inline]
     pub fn output(&self, filename: &str) {
         let mut f = File::create(filename).expect("Unable to create file");
-        for i in 0..self.size {                                                                                                                                                                  
+        for i in 0..self.size() {                                                                                                                                                                  
             writeln!(f, "{}", self.vec[i]).unwrap();                                                                                                                            
         }
     }

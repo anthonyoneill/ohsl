@@ -90,8 +90,8 @@ fn var_as_matrix() {
     mesh.assign( 2.718 );
     mesh[(0,0)][1] = 3.14;
     let mat = mesh.var_as_matrix( 1 );
-    assert_eq!( mat[0][0], 3.14 );
-    assert_eq!( mat[0][1], 2.718 );
+    assert_eq!( mat[(0,0)], 3.14 );
+    assert_eq!( mat[(0,1)], 2.718 );
 }
 
 /*#[test]

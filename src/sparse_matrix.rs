@@ -6,8 +6,6 @@ pub use crate::vector::{Vector, Vec64};
 use std::usize::MAX;
 use std::cmp::{min, max};
 
-use more_asserts::assert_gt;
-
 #[derive(Debug, Copy, Clone, PartialEq, Eq)]
 pub struct Eindex(pub usize);
 
@@ -560,7 +558,7 @@ impl Sparse {
     /// Diagonal entries are those of U;
     /// L has diagonal entries equal to one.
     fn lu_factorize(&mut self) -> SpResult<()> { 
-        assert_gt!( self.diag.len(), 0 );
+        assert!( self.diag.len() > 0 );
         for k in 0..self.axes[ROWS].hdrs.len() {
             if self.hdr(ROWS, k).is_none() { return Err("Singular Matrix"); }
         }
@@ -609,8 +607,8 @@ impl Sparse {
         let e = &self[ei];
         let mr = self[Axis::ROWS].markowitz[e.row];
         let mc = self[Axis::COLS].markowitz[e.col];
-        assert_gt!( mr, 0 );
-        assert_gt!( mc, 0 );
+        assert!( mr > 0 );
+        assert!( mc > 0 );
         return (mr - 1) * (mc - 1);
     }
 

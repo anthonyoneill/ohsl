@@ -18,7 +18,7 @@ impl<T: Copy> Vector<T> {
     /// Assign a value to every element in the vector
     #[inline]
     pub fn assign(&mut self, elem: T ) {
-        for i in 0..self.size {
+        for i in 0..self.size() {
             self.vec[i] = elem;
         }
     }
@@ -29,7 +29,6 @@ impl<T: std::default::Default> Vector<T> {
     #[inline]
     pub fn resize(&mut self, new_size: usize ) {
         self.vec.resize_with( new_size, Default::default );
-        self.size = new_size;
     }
 }
 
@@ -37,9 +36,9 @@ impl<T: Copy + Number> Vector<T> {
     /// Return the dot product of two vectors v.dot(w)
     #[inline]
     pub fn dot(&self, w: &Vector<T>) -> T {
-        if self.size != w.size { panic!( "Vector sizes do not agree dot()." ); }
+        if self.size() != w.size() { panic!( "Vector sizes do not agree dot()." ); }
         let mut result: T = T::zero();
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result += self.vec[i] * w.vec[i];
         }
         result
@@ -48,15 +47,15 @@ impl<T: Copy + Number> Vector<T> {
     /// Return the sum of all the elements in the vector
     #[inline]
     pub fn sum(&self) -> T {
-        self.sum_slice( 0, self.size - 1 )
+        self.sum_slice( 0, self.size() - 1 )
     }
 
     /// Return the sum of the elements in the vector from index start to end 
     #[inline]
     pub fn sum_slice(&self, start: usize, end: usize) -> T {
         if start > end { panic!( "Vector sum: start > end." ); }
-        if self.size <= start { panic!( "Vector range error." ); }
-        if self.size <= end { panic!( "Vector range error." ); }
+        if self.size() <= start { panic!( "Vector range error." ); }
+        if self.size() <= end { panic!( "Vector range error." ); }
         let mut result: T = T::zero();
         for i in start..=end {
             result += self.vec[i].clone();
@@ -67,15 +66,15 @@ impl<T: Copy + Number> Vector<T> {
     /// Return the product of all the elements in the vector
     #[inline]
     pub fn product(&self) -> T {
-        self.product_slice( 0, self.size - 1 )
+        self.product_slice( 0, self.size() - 1 )
     }
 
     /// Return the product of the elements in the vector from index start to end
     #[inline]
     pub fn product_slice(&self, start: usize, end: usize) -> T {
         if start > end { panic!( "Vector sum: start > end." ); }
-        if self.size <= start { panic!( "Vector range error." ); }
-        if self.size <= end { panic!( "Vector range error." ); }
+        if self.size() <= start { panic!( "Vector range error." ); }
+        if self.size() <= end { panic!( "Vector range error." ); }
         let mut result: T = self.vec[start].clone();
         for i in start+1..=end {
             result *= self.vec[i].clone();
@@ -88,19 +87,19 @@ impl<T: Clone + Signed> Vector<T> {
     /// Return a vector containing the absolute values of the elements 
     #[inline]
     pub fn abs(&self) -> Self {
-        let size = self.size;
+        let size = self.size();
         let mut vec = vec![ T::zero(); size ];
         for i in 0..size {
             vec[i] = self.vec[i].abs();
         }
-        Vector { vec, size }
+        Vector { vec }//, size }
     }
 
     /// Return the L1 norm: sum of absolute values 
     #[inline]
     pub fn norm_1(&self) -> T {
         let mut result = T::zero();
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result += self.vec[i].abs();
         }
         result

@@ -11,7 +11,7 @@ impl Vector<f64> {
         for i in 0..size {
             vec[i] = a + h * (i as f64);
         }
-        Vector{ vec, size }
+        Vector{ vec }
     }
 
     /// Create a nonuniform vector of f64 with n elements with lower limit a,
@@ -22,14 +22,14 @@ impl Vector<f64> {
         for i in 0..size {
             vec[i] = a + (b - a) * f64::powf( (i as f64) / ((size as f64) - 1.0), p );
         }
-        Vector{ vec, size }
+        Vector{ vec }
     }
 
     /// Return the L2 norm: square root of the sum of the squares
     #[inline]
     pub fn norm_2(&self) -> f64 {
         let mut result = 0.0;
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result += f64::powf( self.vec[i].abs(), 2.0 );
         }
         f64::sqrt( result )
@@ -40,7 +40,7 @@ impl Vector<f64> {
     #[inline]
     pub fn norm_p(&self, p: f64 ) -> f64 {
         let mut result = 0.0;
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result += f64::powf( self.vec[i].abs(), p );
         }
         f64::powf( result, 1.0/p )
@@ -50,7 +50,7 @@ impl Vector<f64> {
     #[inline]
     pub fn norm_inf(&self) -> f64 {
         let mut result = self.vec[0].abs();
-        for i in 1..self.size {
+        for i in 1..self.size() {
             if result < self.vec[i].abs() {
                 result = self.vec[i].abs();
             }
@@ -66,6 +66,6 @@ impl Vector<f64> {
         for i in 0..size {
             vec[i] = rng.gen::<f64>()
         }
-        Vector{ vec, size }
+        Vector{ vec }
     }
 }

@@ -93,27 +93,33 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
         let mut l = self.m1;
         for i in 0..self.m1 {
             for j in self.m1 - i..mm {
-                au[ i ][ j - l ] = au[ i ][ j ];
+                //au[ i ][ j - l ] = au[ i ][ j ];
+                au[(i, j - l)] = au[(i, j)];
             }
             l -= 1;
             for j in mm - l - 1..mm {
-                au[ i ][ j ] = T::zero();
+                //au[ i ][ j ] = T::zero();
+                au[(i, j)] = T::zero();
             }
         }
         *d = T::one();
         l = self.m1;
         for k in 0..self.n {
-            let mut dum = au[ k ][ 0 ];
+            //let mut dum = au[ k ][ 0 ];
+            let mut dum = au[(k, 0)];
             let mut i = k;
             if l < self.n { l += 1; }
             for j in k + 1..l {
-                if au[ j ][ 0 ] > dum {
-                    dum = au[ j ][ 0 ];
+                //if au[ j ][ 0 ] > dum {
+                if au[(j, 0)] > dum {
+                    //dum = au[ j ][ 0 ];
+                    dum = au[(j, 0)];
                     i = j;
                 }
             }
             index[ k ] = i + 1;
-            if dum == T::zero() { au[ k ][ 0 ] = T::zero(); }
+            //if dum == T::zero() { au[ k ][ 0 ] = T::zero(); }
+            if dum == T::zero() { au[(k, 0)] = T::zero();} 
             if i != k {
                 *d = -*d;
                 for j in 0..mm {
@@ -121,12 +127,16 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
                 }
             }
             for i in k + 1..l {
-                dum = au[ i ][ 0 ] / au[ k ][ 0 ];
-                al[ k ][ i - k - 1 ] = dum;
+                //dum = au[ i ][ 0 ] / au[ k ][ 0 ];
+                dum = au[(i, 0)] / au[(k, 0)];
+                //al[ k ][ i - k - 1 ] = dum;
+                al[(k, i - k - 1)] = dum;
                 for j in 1..mm {
-                    au[ i ][ j - 1 ] = au[ i ][ j ] - dum * au[ k ][ j ];
+                    //au[ i ][ j - 1 ] = au[ i ][ j ] - dum * au[ k ][ j ];
+                    au[(i, j - 1)] = au[(i, j)] - dum * au[(k, j)];
                 }
-                au[ i ][ mm - 1 ] = T::zero();
+                //au[ i ][ mm - 1 ] = T::zero();
+                au[(i, mm - 1)] = T::zero();
             }
         }
 
@@ -142,7 +152,8 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
         self.decompose( &mut au, &mut al, &mut index, &mut d );
         let mut dd = d.clone();
         for i in 0..self.n {
-            dd *= au[ i ][ 0 ];
+            //dd *= au[ i ][ 0 ];
+            dd *= au[(i, 0)];
         }
         dd
     }
@@ -170,16 +181,19 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
             if l < self.n { l += 1; }
             for j in k + 1..l {
                 let xk = x[ k ];
-                x[ j ] -= al[ k ][ j - k - 1 ] * xk;
+                //x[ j ] -= al[ k ][ j - k - 1 ] * xk;
+                x[ j ] -= al[(k, j - k - 1)] * xk;
             }
         }
         l = 1;
         for i in (0..self.n).rev() {
             let mut dum = x[ i ].clone();
             for k in 1..l {
-                dum -= au[ i ][ k ] * x[ k + i ];
+                //dum -= au[ i ][ k ] * x[ k + i ];
+                dum -= au[(i, k)] * x[ k + i ];
             }
-            x[ i ] = dum / au[ i ][ 0 ];
+            //x[ i ] = dum / au[ i ][ 0 ];
+            x[ i ] = dum / au[(i, 0)];
             if l < mm { l += 1; }
         }
         x
@@ -193,7 +207,8 @@ impl<T> Index<(usize, usize)> for Banded<T> {
     fn index<'a>(&'a self, index: ( usize, usize ) ) -> &'a T {
         let ( i, j ) = index;
         if j > i + self.m2 || i > j + self.m1 { panic!("Banded error: index not in a band."); }
-        &self.compact[ i ][ self.m1 + j - i ]
+        //&self.compact[ i ][ self.m1 + j - i ]
+        &self.compact[ (i, self.m1 + j - i) ]
     }
 }
 
@@ -203,7 +218,8 @@ impl<T> IndexMut<(usize, usize)> for Banded<T> {
     fn index_mut(&mut self, index: ( usize, usize ) ) -> &mut T {
         let ( i, j ) = index;
         if j > i + self.m2 || i > j + self.m1 { panic!("Banded error: index not in a band."); }
-        &mut self.compact[ i ][ self.m1 + j - i ]
+        //&mut self.compact[ i ][ self.m1 + j - i ]
+        &mut self.compact[ (i, self.m1 + j - i) ]
     }
 }
 
@@ -460,7 +476,8 @@ impl<T: Copy + Clone + Number> Mul<&Vector<T>> for &Banded<T> {
             let k = i as isize - m1;
             let tmploop = std::cmp::min( m1 + m2 + 1, n - k );
             for j in std::cmp::max( 0, - k )..tmploop {
-                result[ i ] += self.compact[ i ][ j as usize ] * vector[ (j + k) as usize ];
+                //result[ i ] += self.compact[ i ][ j as usize ] * vector[ (j + k) as usize ];
+                result[ i ] += self.compact[ (i, j as usize) ] * vector[ (j + k) as usize ];
             }
         }
         result

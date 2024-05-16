@@ -294,25 +294,25 @@ fn determinant() {
 fn convert_to_dense() {
     let mat = Tridiagonal::<f64>::with_elements( 1.0, 2.0, 3.0, 3);
     let dense = mat.convert();
-    assert_eq!( dense[0][0], 2.0 );
-    assert_eq!( dense[0][1], 3.0 );
-    assert_eq!( dense[0][2], 0.0 );
-    assert_eq!( dense[1][0], 1.0 );
-    assert_eq!( dense[1][1], 2.0 );
-    assert_eq!( dense[1][2], 3.0 );
-    assert_eq!( dense[2][0], 0.0 );
-    assert_eq!( dense[2][1], 1.0 );
-    assert_eq!( dense[2][2], 2.0 );
+    assert_eq!( dense[(0,0)], 2.0 );
+    assert_eq!( dense[(0,1)], 3.0 );
+    assert_eq!( dense[(0,2)], 0.0 );
+    assert_eq!( dense[(1,0)], 1.0 );
+    assert_eq!( dense[(1,1)], 2.0 );
+    assert_eq!( dense[(1,2)], 3.0 );
+    assert_eq!( dense[(2,0)], 0.0 );
+    assert_eq!( dense[(2,1)], 1.0 );
+    assert_eq!( dense[(2,2)], 2.0 );
     let mat2 = Tridiagonal::<f64>::with_vecs( 
         vec![ 1.0 ], 
         vec![ 2.0, 3.0 ],
         vec![ 4.0 ] 
     );
     let dense2 = mat2.convert();
-    assert_eq!( dense2[0][0], 2.0 );
-    assert_eq!( dense2[0][1], 4.0 );
-    assert_eq!( dense2[1][0], 1.0 );
-    assert_eq!( dense2[1][1], 3.0 );
+    assert_eq!( dense2[(0,0)], 2.0 );
+    assert_eq!( dense2[(0,1)], 4.0 );
+    assert_eq!( dense2[(1,0)], 1.0 );
+    assert_eq!( dense2[(1,1)], 3.0 );
 }
 
 #[test]

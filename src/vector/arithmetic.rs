@@ -21,9 +21,9 @@ impl<T: Clone + Number> Add<Vector<T>> for Vector<T> {
     /// Add the elements of two vectors together ( binary + )
     #[inline]
     fn add(self, plus: Self) -> Self::Output {
-        if self.size != plus.size { panic!( "Vector sizes do not agree (+)." ); }
+        if self.size() != plus.size() { panic!( "Vector sizes do not agree (+)." ); }
         let mut result = Vec::new();
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result.push( self.vec[i].clone() + plus.vec[i].clone() );
         }
         Self::Output::create( result )
@@ -35,9 +35,9 @@ impl<T: Clone + Number> Sub<Vector<T>> for Vector<T> {
     /// Subtract the elements of one vector from another ( binary - )
     #[inline]
     fn sub(self, minus: Self) -> Self::Output {
-        if self.size != minus.size { panic!( "Vector sizes do not agree (-)." ); }
+        if self.size() != minus.size() { panic!( "Vector sizes do not agree (-)." ); }
         let mut result = Vec::new();
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result.push( self.vec[i].clone() - minus.vec[i].clone() );
         }
         Self::Output::create( result )
@@ -50,7 +50,7 @@ impl<T: Clone + Number> Mul<T> for Vector<T> {
     #[inline]
     fn mul(self, scalar: T) -> Self::Output {
         let mut result = Vec::new();
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result.push( self.vec[i].clone() * scalar.clone() );
         }
         Self::Output::create( result )
@@ -63,7 +63,7 @@ impl Mul<Vector<f64>> for f64 {
     #[inline]
     fn mul(self, vector: Vector<f64>) -> Self::Output {
         let mut result = Vec::new();
-        for i in 0..vector.size {
+        for i in 0..vector.size() {
             result.push( self.clone() * vector.vec[i].clone() );
         }
         Self::Output::create( result )
@@ -75,7 +75,7 @@ impl<T: Clone + Number> Div<T> for Vector<T> {
     /// Divide a vector by a scalar (vector / scalar)
     fn div(self, scalar: T) -> Self::Output {
         let mut result = Vec::new();
-        for i in 0..self.size {
+        for i in 0..self.size() {
             result.push( self.vec[i].clone() / scalar.clone() );
         }
         Self::Output::create( result )
@@ -85,8 +85,8 @@ impl<T: Clone + Number> Div<T> for Vector<T> {
 impl<T: Clone + Number> AddAssign for Vector<T> {
     /// Add a vector to a mutable vector and assign the result ( += )
     fn add_assign(&mut self, rhs: Self) {
-        if self.size != rhs.size { panic!( "Vector sizes do not agree (+=)." ); }
-        for i in 0..self.size {
+        if self.size() != rhs.size() { panic!( "Vector sizes do not agree (+=)." ); }
+        for i in 0..self.size() {
             self.vec[i] += rhs.vec[i].clone();
         }
     }
@@ -95,8 +95,8 @@ impl<T: Clone + Number> AddAssign for Vector<T> {
 impl<T: Clone + Number> SubAssign for Vector<T> {
     /// Substract a vector from a mutable vector and assign the result ( -= )
     fn sub_assign(&mut self, rhs: Self) {
-        if self.size != rhs.size { panic!( "Vector sizes do not agree (-=)." ); }
-        for i in 0..self.size {
+        if self.size() != rhs.size() { panic!( "Vector sizes do not agree (-=)." ); }
+        for i in 0..self.size() {
             self.vec[i] -= rhs.vec[i].clone();
         }
     }
@@ -105,7 +105,7 @@ impl<T: Clone + Number> SubAssign for Vector<T> {
 impl<T: Clone + Number> AddAssign<T> for Vector<T> {
     /// Add the same value to every element in a mutable vector 
     fn add_assign(&mut self, rhs: T) {
-        for i in 0..self.size {
+        for i in 0..self.size() {
             self.vec[i] += rhs.clone();
         }
     }
@@ -114,7 +114,7 @@ impl<T: Clone + Number> AddAssign<T> for Vector<T> {
 impl<T: Clone + Number> SubAssign<T> for Vector<T> {
     /// Subtract the same value from every element in a mutable vector 
     fn sub_assign(&mut self, rhs: T) {
-        for i in 0..self.size {
+        for i in 0..self.size() {
             self.vec[i] -= rhs.clone();
         }
     }
@@ -123,7 +123,7 @@ impl<T: Clone + Number> SubAssign<T> for Vector<T> {
 impl<T: Clone + Number> MulAssign<T> for Vector<T> {
     /// Multiply every element in a mutable vector by a scalar 
     fn mul_assign(&mut self, rhs: T) {
-        for i in 0..self.size {
+        for i in 0..self.size() {
             self.vec[i] *= rhs.clone();
         }
     }
@@ -132,7 +132,7 @@ impl<T: Clone + Number> MulAssign<T> for Vector<T> {
 impl<T: Clone + Number> DivAssign<T> for Vector<T> {
     /// Divide every element in a mutable vector by a scalar 
     fn div_assign(&mut self, rhs: T) {
-        for i in 0..self.size {
+        for i in 0..self.size() {
             self.vec[i] /= rhs.clone();
         }
     }
