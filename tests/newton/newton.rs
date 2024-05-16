@@ -1,6 +1,7 @@
 use ohsl::vector::Vec64;
 use ohsl::matrix::Mat64;
 use ohsl::newton::Newton;
+use ohsl::complex::Cmplx;
 
 #[test]
 fn constructor() {
@@ -93,4 +94,21 @@ fn exact_jacobian_solve() {
     let solution = newton.solve_jacobian( &vecfunc, &jacfunc ).unwrap();
     assert!( ( solution[0] - 1.0) < 1.0e-8 );
     assert!( ( solution[1] - 0.0) < 1.0e-8 );
+}
+
+fn x_cubed_minus_two(x: Cmplx) -> Cmplx {
+    x * x * x - 2.0
+}
+
+#[test]
+fn solve_cmplx() {
+    let mut newton = Newton::<Cmplx>::new( Cmplx::new( 1.0, 0.0 ) );
+    let solution = newton.solve( &x_cubed_minus_two );
+    assert_eq!( solution.unwrap(), Cmplx::new( 1.2599210498948732, 0.0 ) );
+    newton.guess( Cmplx::new( -1.0, 1.0 ) );
+    let solution = newton.solve( &x_cubed_minus_two );
+    assert_eq!( solution.unwrap(), Cmplx::new( -0.6299605249474366, 1.0911236359717214 ) );
+    newton.guess( Cmplx::new( -1.0, -1.0 ) );
+    let solution = newton.solve( &x_cubed_minus_two );
+    assert_eq!( solution.unwrap(), Cmplx::new( -0.6299605249474366, -1.0911236359717214 ) );
 }

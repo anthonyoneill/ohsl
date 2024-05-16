@@ -1,5 +1,5 @@
 pub use crate::traits::{Number, Signed, Zero, One};
-pub use crate::complex::Complex;
+pub use crate::complex::Cmplx;
 pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
 
@@ -63,6 +63,25 @@ impl Newton<f64> {
         for _ in 0..self.max_iter {
             let deriv = ( func( current + self.delta ) - 
                           func( current - self.delta ) ) / ( 2.0 * self.delta );
+            let dx = func(current) / deriv;
+            current -= dx;
+            if dx.abs() <= self.tol {
+                return Ok( current );
+            }
+        }
+        Err( current ) 
+    }
+}
+
+impl Newton<Cmplx> {
+    /// Solve the equation via Newton iteration 
+    #[inline]
+    pub fn solve(&self, func: &dyn Fn(Cmplx) -> Cmplx ) -> Result<Cmplx, Cmplx> {
+        let mut current: Cmplx = self.guess;
+        for _ in 0..self.max_iter {
+            let deriv = ( func( current + Cmplx::new(self.delta, 0.0) ) - 
+                          func( current - Cmplx::new(self.delta, 0.0) ) ) / ( 2.0 * self.delta );
+            println!("current: {}, deriv: {}", current, deriv);
             let dx = func(current) / deriv;
             current -= dx;
             if dx.abs() <= self.tol {
