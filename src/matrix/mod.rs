@@ -11,7 +11,7 @@ pub use crate::vector::{Vector, Vec64};
 
 #[derive(PartialEq)]
 pub struct Matrix<T> {
-    mat: Vec< Vector<T> >,
+    mat: Vec< Vector<T> >, //TODO change to Vec<T> with row-major order indexing
     rows: usize,
     cols: usize,
 }
