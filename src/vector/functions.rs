@@ -8,8 +8,8 @@ impl<T: std::cmp::PartialEq> Vector<T> {
     pub fn find(&self, value: T ) -> usize {
         let index = self.vec.iter().position( |x| *x == value );
         match index {
-            None => panic!( "Entry not found in Vector." ),
             Some(index) => return index,
+            None => self.size() - 1, // If not found return last index
         }
     }
 }

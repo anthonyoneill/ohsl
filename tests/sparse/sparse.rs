@@ -2,7 +2,7 @@ mod tridiagonal;
 mod banded;
 
 use ohsl::sparse_matrix::{Sparse, MatrixState, Axis};
-use ohsl::vector::Vec64;
+use ohsl::vector::{Vector, Vec64};
 
 #[test]
 fn create_matrix() {
@@ -83,4 +83,133 @@ fn solve() {
     let soln = s._solve(rhs).unwrap();
     let correct = vec![6.0/44.0, 19.0/44.0, -10.0/44.0];
     assert_eq!( soln, correct );
+}
+
+/* Sparse2 */
+
+use ohsl::sparse2::Sparse2;
+
+#[test]
+fn create_sparse2() {
+    let s = Sparse2::<f64>::new( 5, 7 );
+    assert_eq!( s.rows, 5 );
+    assert_eq!( s.cols, 7 );
+    assert_eq!( s.nonzero, 0 );
+}
+
+fn test_sparse_matrix() -> Sparse2::<f64> {
+    let val = vec![ 3.0, 4.0, 7.0, 1.0, 5.0, 2.0, 9.0, 6.0, 5.0 ];
+    let row_index = vec![ 0, 1, 2, 0, 2, 0, 2, 4, 4 ];
+    let col_start = vec![ 0, 1, 3, 5, 8, 9 ];
+    Sparse2::<f64>::from_vecs( 5, 5, val, row_index, col_start )
+}
+
+#[test]
+fn create_from_vecs_sparse2() {
+    let s = test_sparse_matrix();
+    assert_eq!( s.rows, 5 );
+    assert_eq!( s.cols, 5 );
+    assert_eq!( s.nonzero, 9 );
+    assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
+    assert_eq!( s.get( 1, 1 ), Some( 4.0 ) );
+    assert_eq!( s.get( 2, 1 ), Some( 7.0 ) );
+    assert_eq!( s.get( 0, 2 ), Some( 1.0 ) );
+    assert_eq!( s.get( 2, 2 ), Some( 5.0 ) );
+    assert_eq!( s.get( 0, 3 ), Some( 2.0 ) );
+    assert_eq!( s.get( 2, 3 ), Some( 9.0 ) );
+    assert_eq!( s.get( 4, 3 ), Some( 6.0 ) );
+    assert_eq!( s.get( 4, 4 ), Some( 5.0 ) );
+    assert_eq!( s.get( 3, 3 ), None );
+}
+
+#[test]
+fn insert_sparse2() {
+    let mut s = test_sparse_matrix();
+    s.insert( &3, &3, &8.0 );
+    assert_eq!( s.get( 3, 3 ), Some( 8.0 ) );
+    assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
+    s.insert( &0, &0, &17.0 );
+    assert_eq!( s.get( 0, 0 ), Some( 17.0 ) );
+}
+
+#[test]
+fn col_index_sparse2() {
+    let s = test_sparse_matrix();
+    let col_index = s.col_index();
+    assert_eq!( col_index.vec, vec![ 0, 1, 1, 2, 2, 3, 3, 3, 4 ] );
+}
+
+#[test]
+fn col_start_from_index_sparse2() {
+    let s = test_sparse_matrix();
+    let col_index = Vector::<usize>::create( vec![ 0, 1, 1, 2, 2, 3, 3, 3, 4 ] );
+    let col_start = s.col_start_from_index( &col_index );
+    assert_eq!( col_start, vec![ 0, 1, 3, 5, 8, 9 ] );
+}
+
+#[test]
+fn insert_new_sparse2() {
+    let mut s = Sparse2::<f64>::new( 5, 5 );
+    assert_eq!( s.rows, 5 );
+    assert_eq!( s.cols, 5 );
+    assert_eq!( s.nonzero, 0 );
+    s.insert( &2, &2, &1.0 );
+    assert_eq!( s.get( 2, 2 ), Some( 1.0 ) );
+    s.insert( &1, &1, &2.0 );
+    assert_eq!( s.get( 1, 1 ), Some( 2.0 ) );
+    s.insert( &0, &0, &3.0 );
+    assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
+    assert_eq!( s.nonzero, 3 );
+}
+
+#[test]
+fn scale_sparse2() {
+    let mut s = test_sparse_matrix();
+    s.scale( &2.0 );
+    assert_eq!( s.get( 0, 0 ), Some( 6.0 ) );
+    assert_eq!( s.get( 1, 1 ), Some( 8.0 ) );
+    assert_eq!( s.get( 2, 1 ), Some( 14.0 ) );
+    assert_eq!( s.get( 0, 2 ), Some( 2.0 ) );
+    assert_eq!( s.get( 2, 2 ), Some( 10.0 ) );
+    assert_eq!( s.get( 0, 3 ), Some( 4.0 ) );
+    assert_eq!( s.get( 2, 3 ), Some( 18.0 ) );
+    assert_eq!( s.get( 4, 3 ), Some( 12.0 ) );
+    assert_eq!( s.get( 4, 4 ), Some( 10.0 ) );
+    assert_eq!( s.get( 3, 3 ), None );
+}
+
+#[test]
+fn multiply_sparse2() {
+    let s = test_sparse_matrix();
+    let v = Vector::<f64>::create( vec![ 1.0, 1.0, 1.0, 1.0, 1.0 ] );
+    let result = s.multiply( &v );
+    assert_eq!( result.vec, vec![ 6.0, 4.0, 21.0, 0.0, 11.0 ] );
+}
+
+#[test]
+fn transpose_multiply_sparse2() {
+    let s = test_sparse_matrix();
+    let v = Vector::<f64>::create( vec![ 1.0, 1.0, 1.0, 1.0, 1.0 ] );
+    let result = s.transpose_multiply( &v );
+    assert_eq!( result.vec, vec![ 3.0, 11.0, 6.0, 17.0, 5.0 ] );
+}
+
+#[test]
+fn transpose_sparse2() {
+    let s = test_sparse_matrix();
+    let t = s.transpose();
+    assert_eq!( t.rows, 5 );
+    assert_eq!( t.cols, 5 );
+    assert_eq!( t.nonzero, 9 );
+    assert_eq!( t.get( 0, 0 ), Some( 3.0 ) );
+    assert_eq!( t.get( 1, 1 ), Some( 4.0 ) );
+    assert_eq!( t.get( 1, 2 ), Some( 7.0 ) );
+    assert_eq!( t.get( 2, 0 ), Some( 1.0 ) );
+    assert_eq!( t.get( 2, 2 ), Some( 5.0 ) );
+    assert_eq!( t.get( 3, 0 ), Some( 2.0 ) );
+    assert_eq!( t.get( 3, 2 ), Some( 9.0 ) );
+    assert_eq!( t.get( 3, 4 ), Some( 6.0 ) );
+    assert_eq!( t.get( 4, 4 ), Some( 5.0 ) );
+    assert_eq!( t.get( 3, 3 ), None );
+    assert_eq!( t.get( 0, 2 ), None );
 }

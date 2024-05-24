@@ -17,6 +17,7 @@ pub mod sparse_matrix;
 pub mod polynomial;
 pub mod tridiagonal;
 pub mod banded;
+pub mod sparse2;
 
 // Re-exports
 pub use self::complex::{Complex, Cmplx};
@@ -30,3 +31,4 @@ pub use self::sparse_matrix::Sparse;
 pub use self::polynomial::Polynomial;
 pub use self::tridiagonal::Tridiagonal;
 pub use self::banded::Banded;
+pub use self::sparse2::Sparse2;
