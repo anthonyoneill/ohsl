@@ -83,7 +83,7 @@ impl<T: Copy + Number> Vector<T> {
     }
 }
 
-impl<T: Clone + Signed> Vector<T> {
+impl<T: Clone + Signed + Number> Vector<T> {
     /// Return a vector containing the absolute values of the elements 
     #[inline]
     pub fn abs(&self) -> Self {

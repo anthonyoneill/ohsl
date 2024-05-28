@@ -1,6 +1,8 @@
 use crate::vector::Vector;
 pub use crate::traits::{Number, Zero};
 
+//TODO enum for preconditioner type
+
 pub struct Sparse2<T> {
     pub rows: usize,                // Number of rows
     pub cols: usize,                // Number of columns
@@ -10,21 +12,7 @@ pub struct Sparse2<T> {
     pub col_start: Vec<usize>,      // Column indices of non-zero values
 }
 
-impl<T: Copy + Number> Sparse2<T> {
-    /// Create a new sparse matrix of specified size
-    pub fn new( rows: usize, cols: usize ) -> Self {
-        Self {
-            rows,
-            cols,
-            nonzero: 0,
-            //val: Vec::new(),
-            val: vec![ T::zero(); 0 ],
-            //row_index: Vec::new(),
-            row_index: vec![ 0; 0 ],
-            col_start: vec![ 0; cols + 1],
-        }
-    }
-
+impl<T: Copy + Number + std::fmt::Debug> Sparse2<T> {
     // Create a new sparse matrix of specified size and number of non-zero elements
     fn new_nonzero( rows: usize, cols: usize, nonzero: usize ) -> Self {
         Self {
@@ -47,8 +35,40 @@ impl<T: Copy + Number> Sparse2<T> {
             nonzero: col_start[ col_start.len() - 1 ],
             val,
             row_index,
+            //row_index: Vector::create( row_index ),
             col_start,
         }
+    }
+
+    /// Create a new sparse matrix of specified size using a vector of triplets
+    pub fn from_triplets( rows: usize, cols: usize, triplets: &mut Vec<(usize, usize, T)> ) -> Self {
+        // Sort the triplets for column major ordering
+        triplets.sort_by_key( |triplet| triplet.1 ); // Sort by column first 
+        let mut row_index = vec![];
+        let mut col_index = vec![];
+        let mut val = vec![];
+        let mut nonzero = 0;
+        for triplet in triplets.iter() {
+            let row = triplet.0;
+            let col = triplet.1;
+            if row >= rows { panic!( "Sparse matrix from_triplets: row range error." ); }
+            if col >= cols { panic!( "Sparse matrix from_triplets: col range error." ); }
+            //TODO check for duplicate entries
+            row_index.push( triplet.0 );
+            col_index.push( triplet.1 );
+            val.push( triplet.2 );
+            nonzero += 1;
+        }
+        let mut sparse = Self {
+            rows,
+            cols,
+            nonzero,
+            val,
+            row_index,
+            col_start: vec![ 0; cols + 1 ]
+        };
+        sparse.col_start = sparse.col_start_from_index( &Vector::create( col_index ) );
+        sparse
     }
 
     /// Return a vector of column indices relating to each value ( triplet form )
@@ -106,7 +126,7 @@ impl<T: Copy + Number> Sparse2<T> {
     }
 
     /// Insert a non-zero element into the sparse matrix at the specified row and column
-    pub fn insert( &mut self, row: &usize, col: &usize, value: &T ) {
+    /*pub fn insert( &mut self, row: &usize, col: &usize, value: &T ) {
         if self.rows <= *row { panic!( "Sparse matrix insert: row range error." ); }
         if self.cols <= *col { panic!( "Sparse matrix insert: col range error." ); }
         if self.col_start.len() <= *col { 
@@ -130,17 +150,24 @@ impl<T: Copy + Number> Sparse2<T> {
         }
         // If nonzero != 0 insert new element
         let find_col = col_index.find( *col );
+        //println!( "find_col: {}", find_col );
         col_index.insert( find_col, *col );
         let mut find_row = find_col;
-        while self.row_index[ find_row ] < *row {
+        println!( "find_row: {}", find_row );
+        println!( "row_index: {:?}", self.row_index );
+        while self.row_index[ find_row ] < *row  {
             find_row += 1;
         }
+        println!( "find_row: {}", find_row );
         self.row_index.insert( find_row, *row );
         self.val.insert( find_row, *value );
         // Convert back to compressed sparse column format
         self.col_start = self.col_start_from_index( &col_index );
         self.nonzero += 1;
-    }
+
+        // Insert the new element into the correct position
+        
+    }*/
 
     /// Scale the non-zero elements of sparse matrix by a given value
     pub fn scale( &mut self, value: &T ) {
@@ -204,6 +231,91 @@ impl<T: Copy + Number> Sparse2<T> {
         at
     }
 
-    //TODO solve_bicg, diagonal_preconditioner, identity_preconditioner 
-    // solve_bicgstab, solve_cg, solve_qmr, solve_gmres
+    // Identity preconditioner for the solve_bicg method
+    fn identity_preconditioner( &self, b: &Vector<T>, x: &mut Vector<T> ) {
+        if self.rows != b.size() { 
+            panic!( "Sparse matrix identity_preconditioner: matrix and vector sizes do not agree." ); 
+        }
+        for i in 0..self.rows {
+            x[ i ] = b[ i ];
+        }
+    }
+
+    // Diagonal preconditioner for the solve_bicg method
+    /*fn diagonal_preconditioner( &self, b: &Vector<T>, x: &mut Vector<T> ) {
+        if self.rows != b.size() { 
+            panic!( "Sparse matrix diagonal_preconditioner: matrix and vector sizes do not agree." ); 
+        }
+        for i in 0..self.rows {
+            for j in self.col_start[ i ]..self.col_start[ i + 1 ] {
+                if self.row_index[ j ] == i {
+                    x[ i ] = b[ i ] / self.val[ j ];
+                }
+            }
+        }
+    }*/
+
+    //TODO solve_bicgstab, solve_cg, solve_qmr, solve_gmres
+}
+
+impl Sparse2<f64> {
+    /// Solve the system of equations Ax=b using the biconjugate gradient method 
+    pub fn solve_bicg( &self, b: &Vector<f64>, x: &mut Vector<f64>, max_iter: usize, tol: f64, itol: usize ) -> Result<usize, f64> {
+        if self.rows != b.size() { 
+            panic!( "Sparse matrix solve_bicg: matrix and vector sizes do not agree." ); 
+        }
+        if self.rows != self.cols { 
+            panic!( "Sparse matrix solve_bicg: matrix is not square." ); 
+        }
+        if b.size() != x.size() { 
+            panic!( "Sparse matrix solve_bicg: b.size() != x.size()." ); 
+        }
+        let mut r = b.clone() - self.multiply( x );
+        let mut rr = r.clone();
+        let bnrm: f64;
+        let mut err: f64 = 1.0;
+        let mut z = Vector::new( self.rows, 0.0 );
+        let mut zz = Vector::new( self.rows, 0.0 );
+        let mut p = Vector::new( self.rows, 0.0 );
+        let mut pp = Vector::new( self.rows, 0.0 );
+        if itol == 1 {
+            bnrm = b.norm_2();
+            self.identity_preconditioner( &r, &mut z );
+        }
+        else if itol == 2 {
+            self.identity_preconditioner( &b, &mut z );
+            bnrm = z.norm_2();
+            self.identity_preconditioner( &r, &mut z );
+        }
+        else {
+            panic!( "Sparse matrix solve_bicg: itol must be 1 or 2." );
+        }
+        let mut rho_2 = 1.0;
+        let mut iter: usize = 0;
+        while iter < max_iter {
+            iter += 1;
+            self.identity_preconditioner( &rr, &mut zz );
+            let rho_1 = z.dot( &rr );
+            if iter == 1 {
+                p = z.clone();
+                pp = zz.clone();
+            } else {
+                let beta = rho_1 / rho_2;
+                p = z.clone() + p.clone() * beta;
+                pp = zz.clone() + pp * beta;
+            }
+            z = self.multiply( &p );
+            let alpha = rho_1 / z.dot( &pp );
+            zz = self.transpose_multiply( &pp );
+            *x += p.clone() * alpha;
+            r -= z.clone() * alpha;
+            rr -= zz.clone() * alpha;
+            self.identity_preconditioner( &r, &mut z );
+            rho_2 = rho_1;
+            if itol == 1 { err = r.norm_2() / bnrm; }
+            if itol == 2 { err = z.norm_2() / bnrm; }
+            if err <= tol { return Ok(iter); }
+        }
+        Err(err)
+    }
 }

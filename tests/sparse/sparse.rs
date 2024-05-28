@@ -89,14 +89,6 @@ fn solve() {
 
 use ohsl::sparse2::Sparse2;
 
-#[test]
-fn create_sparse2() {
-    let s = Sparse2::<f64>::new( 5, 7 );
-    assert_eq!( s.rows, 5 );
-    assert_eq!( s.cols, 7 );
-    assert_eq!( s.nonzero, 0 );
-}
-
 fn test_sparse_matrix() -> Sparse2::<f64> {
     let val = vec![ 3.0, 4.0, 7.0, 1.0, 5.0, 2.0, 9.0, 6.0, 5.0 ];
     let row_index = vec![ 0, 1, 2, 0, 2, 0, 2, 4, 4 ];
@@ -123,16 +115,6 @@ fn create_from_vecs_sparse2() {
 }
 
 #[test]
-fn insert_sparse2() {
-    let mut s = test_sparse_matrix();
-    s.insert( &3, &3, &8.0 );
-    assert_eq!( s.get( 3, 3 ), Some( 8.0 ) );
-    assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
-    s.insert( &0, &0, &17.0 );
-    assert_eq!( s.get( 0, 0 ), Some( 17.0 ) );
-}
-
-#[test]
 fn col_index_sparse2() {
     let s = test_sparse_matrix();
     let col_index = s.col_index();
@@ -145,21 +127,6 @@ fn col_start_from_index_sparse2() {
     let col_index = Vector::<usize>::create( vec![ 0, 1, 1, 2, 2, 3, 3, 3, 4 ] );
     let col_start = s.col_start_from_index( &col_index );
     assert_eq!( col_start, vec![ 0, 1, 3, 5, 8, 9 ] );
-}
-
-#[test]
-fn insert_new_sparse2() {
-    let mut s = Sparse2::<f64>::new( 5, 5 );
-    assert_eq!( s.rows, 5 );
-    assert_eq!( s.cols, 5 );
-    assert_eq!( s.nonzero, 0 );
-    s.insert( &2, &2, &1.0 );
-    assert_eq!( s.get( 2, 2 ), Some( 1.0 ) );
-    s.insert( &1, &1, &2.0 );
-    assert_eq!( s.get( 1, 1 ), Some( 2.0 ) );
-    s.insert( &0, &0, &3.0 );
-    assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
-    assert_eq!( s.nonzero, 3 );
 }
 
 #[test]
@@ -212,4 +179,63 @@ fn transpose_sparse2() {
     assert_eq!( t.get( 4, 4 ), Some( 5.0 ) );
     assert_eq!( t.get( 3, 3 ), None );
     assert_eq!( t.get( 0, 2 ), None );
+}
+
+#[test]
+fn triplet_sparse2() {
+    let mut triplets = vec![];
+    triplets.push( (0, 3, 2.0) );
+    triplets.push( (2, 3, 9.0) );
+    triplets.push( (4, 3, 6.0) );
+    triplets.push( (4, 4, 5.0) );
+    triplets.push( (0, 0, 3.0) );
+    triplets.push( (1, 1, 4.0) );
+    triplets.push( (2, 1, 7.0) );
+    triplets.push( (0, 2, 1.0) );
+    triplets.push( (2, 2, 5.0) );
+    triplets.push( (3, 2, 1.0) );
+    let s = Sparse2::<f64>::from_triplets( 5, 5, &mut triplets );
+    assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
+    assert_eq!( s.get( 1, 1 ), Some( 4.0 ) );
+    assert_eq!( s.get( 2, 1 ), Some( 7.0 ) );
+    assert_eq!( s.get( 0, 2 ), Some( 1.0 ) );
+    assert_eq!( s.get( 2, 2 ), Some( 5.0 ) );
+    assert_eq!( s.get( 4, 3 ), Some( 6.0 ) );
+    assert_eq!( s.get( 2, 3 ), Some( 9.0 ) );
+    assert_eq!( s.get( 0, 3 ), Some( 2.0 ) );
+    assert_eq!( s.get( 4, 4 ), Some( 5.0 ) );
+    assert_eq!( s.get( 3, 2 ), Some( 1.0 ) );
+    assert_eq!( s.get( 3, 3 ), None );
+}
+
+
+fn test_sparse_matrix_2() -> Sparse2::<f64> {
+    let mut triplets = vec![];
+    triplets.push( (0, 0, 3.0) );
+    triplets.push( (0, 2, 1.0) );
+    triplets.push( (0, 3, 2.0) );
+    triplets.push( (1, 1, 4.0) );
+    triplets.push( (2, 1, 7.0) );
+    triplets.push( (2, 2, 5.0) );
+    triplets.push( (2, 3, 9.0) );
+    triplets.push( (3, 2, 1.0) );
+    triplets.push( (4, 3, 6.0) );
+    triplets.push( (4, 4, 5.0) ); 
+    Sparse2::<f64>::from_triplets( 5, 5, &mut triplets )
+}
+
+#[test]
+fn solve_bicg_sparse2() {
+    let s = test_sparse_matrix_2();
+    let b = Vector::<f64>::create( vec![ 1.0, 2.0, 3.0, 4.0, 5.0 ] );
+    let mut x = Vector::<f64>::new( 5, 0.0 );
+    let max_iter = 1000;
+    let tol = 1e-8;
+    let result = s.solve_bicg( &b, &mut x, max_iter, tol, 1 );
+    assert!( result.is_ok() && !result.is_err() );
+    assert!( (x[0] - 0.518518519).abs() < 1e-8 );
+    assert!( (x[1] - 0.5).abs() < 1e-8 );
+    assert!( (x[2] - 4.0).abs() < 1e-8 );
+    assert!( (x[3] - -2.277777778).abs() < 1e-8 );
+    assert!( (x[4] - 3.733333333).abs() < 1e-8 );
 }

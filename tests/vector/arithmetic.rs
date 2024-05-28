@@ -26,6 +26,15 @@ fn binary_subtraction() {
 }
 
 #[test]
+fn non_consuming_subtraction() {
+    let u = Vector::<i32>::new( 10, 3 );
+    let v = Vector::<i32>::new( 10, 4 );
+    let w = u - &v;
+    assert_eq!( w[0], -1 );
+    assert_eq!( w.size(), 10 );
+}
+
+#[test]
 fn add_assign() {
     let mut u = Vector::<f64>::new( 5, 3.0 );
     let v = Vector::<f64>::new( 5, 2.0 );
