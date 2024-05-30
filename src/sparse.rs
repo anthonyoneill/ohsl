@@ -4,7 +4,7 @@ pub use crate::traits::{Number, Zero};
 
 //TODO enum for preconditioner type
 
-pub struct Sparse2<T> {
+pub struct Sparse<T> {
     pub rows: usize,                // Number of rows
     pub cols: usize,                // Number of columns
     pub nonzero: usize,             // Number of non-zero elements
@@ -13,7 +13,7 @@ pub struct Sparse2<T> {
     pub col_start: Vec<usize>,      // Column indices of non-zero values
 }
 
-impl<T: Copy + Number + std::fmt::Debug> Sparse2<T> {
+impl<T: Copy + Number + std::fmt::Debug> Sparse<T> {
     // Create a new sparse matrix of specified size and number of non-zero elements
     fn new_nonzero( rows: usize, cols: usize, nonzero: usize ) -> Self {
         Self {
@@ -208,8 +208,8 @@ impl<T: Copy + Number + std::fmt::Debug> Sparse2<T> {
     }
 
     /// Return the transpose of the sparse matrix
-    pub fn transpose( &self ) -> Sparse2<T> {
-        let mut at = Sparse2::new_nonzero( self.cols, self.rows, self.nonzero );
+    pub fn transpose( &self ) -> Sparse<T> {
+        let mut at = Sparse::new_nonzero( self.cols, self.rows, self.nonzero );
         let mut count = vec![ 0; self.rows ];
         for i in 0..self.cols {
             for j in self.col_start[ i ]..self.col_start[ i + 1 ] {
@@ -298,11 +298,9 @@ impl<T: Copy + Number + std::fmt::Debug> Sparse2<T> {
         }
         dense
     }
-
-    //TODO convert to dense matrix
 }
 
-impl Sparse2<f64> {
+impl Sparse<f64> {
     /// Solve the system of equations Ax=b using the biconjugate gradient method 
     /// with a specified maximum number of iterations and tolerance.
     /// itol = 1: relative residual norm

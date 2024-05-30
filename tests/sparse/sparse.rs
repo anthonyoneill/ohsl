@@ -1,99 +1,14 @@
 mod tridiagonal;
 mod banded;
 
-use ohsl::sparse_matrix::{Sparse, MatrixState, Axis};
-use ohsl::vector::{Vector, Vec64};
+use ohsl::vector::Vector;
+use ohsl::sparse::Sparse;
 
-#[test]
-fn create_matrix() {
-    let m = Sparse::new();
-    assert_eq!(m.state(), MatrixState::CREATED);
-    assert_eq!(m.diag(), vec![]);
-}
-
-#[test]
-fn add_element() {
-    let mut s = Sparse::new();
-
-    s.add_element(0, 0, 1.0);
-    assert_eq!(s.num_rows(), 1);
-    assert_eq!(s.num_cols(), 1);
-    assert_eq!(s.size(), (1, 1));
-    assert_eq!(s.diag().len(), 1);
-
-    s.add_element(100, 100, 1.0);
-    assert_eq!(s.num_rows(), 101);
-    assert_eq!(s.num_cols(), 101);
-    assert_eq!(s.size(), (101, 101));
-    assert_eq!(s.diag().len(), 101);
-}
-
-#[test]
-fn get() {
-    let mut s = Sparse::new();
-    s.add_element(0, 0, 1.0);
-    assert_eq!( s.get(0, 0).unwrap(), 1.0 );
-}
-
-#[test]
-fn identity() {
-    // Check identity matrices of each (small) size
-    for k in 1..10 {
-        let ik = Sparse::identity(k);
-
-        // Basic size checks
-        assert_eq!(ik.num_rows(), k);
-        assert_eq!(ik.num_cols(), k);
-        assert_eq!(ik.size(), (k, k));
-        assert_eq!(ik.elements().len(), k);
-
-        for v in 0..k {
-            // Check each row/ col head is the same element, and this element is on the diagonal
-            let ro = ik.hdr(Axis::ROWS, v).unwrap();
-            let co = ik.hdr(Axis::COLS, v).unwrap();
-            let d0 = ik.get(v, v).unwrap();
-            assert_eq!(ro, co);
-            assert_eq!(ik[ro].val(), d0);
-            assert_eq!(ik[co].val(), d0);
-        }
-    }
-}
-
-#[test]
-fn solve() {
-    let mut s = Sparse::from_triplets(vec![
-        (0, 0, 1.0),
-        (0, 1, 2.0),
-        (1, 0, 3.0),
-        (1, 1, 4.0),
-        (1, 2, 5.0),
-        (2, 1, 6.0),
-        (2, 2, 7.0),
-    ]);
-
-    // ohsl Vector solve
-    let b = Vec64::new( 3, 1.0 );
-    let solution = s.solve( b ).unwrap();
-    assert_eq!( solution[0], 6.0/44.0 );
-    assert_eq!( solution[1], 19.0/44.0 );
-    assert_eq!( solution[2], -10.0/44.0 );
-    
-    // std Vec _solve
-    let rhs = vec![1.0, 1.0, 1.0];
-    let soln = s._solve(rhs).unwrap();
-    let correct = vec![6.0/44.0, 19.0/44.0, -10.0/44.0];
-    assert_eq!( soln, correct );
-}
-
-/* Sparse2 */
-
-use ohsl::sparse2::Sparse2;
-
-fn test_sparse_matrix() -> Sparse2::<f64> {
+fn test_sparse_matrix() -> Sparse::<f64> {
     let val = vec![ 3.0, 4.0, 7.0, 1.0, 5.0, 2.0, 9.0, 6.0, 5.0 ];
     let row_index = vec![ 0, 1, 2, 0, 2, 0, 2, 4, 4 ];
     let col_start = vec![ 0, 1, 3, 5, 8, 9 ];
-    Sparse2::<f64>::from_vecs( 5, 5, val, row_index, col_start )
+    Sparse::<f64>::from_vecs( 5, 5, val, row_index, col_start )
 }
 
 #[test]
@@ -194,7 +109,7 @@ fn triplet_sparse2() {
     triplets.push( (0, 2, 1.0) );
     triplets.push( (2, 2, 5.0) );
     triplets.push( (3, 2, 1.0) );
-    let s = Sparse2::<f64>::from_triplets( 5, 5, &mut triplets );
+    let s = Sparse::<f64>::from_triplets( 5, 5, &mut triplets );
     assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
     assert_eq!( s.get( 1, 1 ), Some( 4.0 ) );
     assert_eq!( s.get( 2, 1 ), Some( 7.0 ) );
@@ -209,7 +124,7 @@ fn triplet_sparse2() {
 }
 
 
-fn test_sparse_matrix_2() -> Sparse2::<f64> {
+fn test_sparse_matrix_2() -> Sparse::<f64> {
     let mut triplets = vec![
         (0, 0, 3.0), (0, 2, 1.0), (0, 3, 2.0),
         (1, 1, 4.0),
@@ -217,7 +132,7 @@ fn test_sparse_matrix_2() -> Sparse2::<f64> {
         (3, 2, 1.0),
         (4, 3, 6.0), (4, 4, 5.0)
     ];
-    Sparse2::<f64>::from_triplets( 5, 5, &mut triplets )
+    Sparse::<f64>::from_triplets( 5, 5, &mut triplets )
 }
 
 #[test]
@@ -258,7 +173,7 @@ fn solve_cg_sparse2() {
         (0, 0, 4.0), (0, 1, 1.0), 
         (1, 0, 1.0), (1, 1, 3.0)
     ];
-    let s = Sparse2::<f64>::from_triplets( 2, 2, &mut triplets );
+    let s = Sparse::<f64>::from_triplets( 2, 2, &mut triplets );
     let b = Vector::<f64>::create( vec![ 1.0, 2.0 ] );
     let mut x = Vector::<f64>::create(vec![ 2.0, 1.0 ]);
     let max_iter = 1000;
@@ -275,7 +190,7 @@ fn solve_qmr_sparse2() {
         (0, 0, 4.0), (0, 1, 1.0), 
         (1, 0, 1.0), (1, 1, 3.0)
     ];
-    let s = Sparse2::<f64>::from_triplets( 2, 2, &mut triplets );
+    let s = Sparse::<f64>::from_triplets( 2, 2, &mut triplets );
     let b = Vector::<f64>::create( vec![ 1.0, 2.0 ] );
     let mut x = Vector::<f64>::create(vec![ 2.0, 1.0 ]);
     let max_iter = 1000;
