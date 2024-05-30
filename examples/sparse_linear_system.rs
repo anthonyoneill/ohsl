@@ -4,7 +4,7 @@ extern crate ohsl;
 
 pub use ohsl::vector::{Vector, Vec64};
 pub use ohsl::matrix::{Matrix, Mat64};
-pub use ohsl::sparse_matrix::Sparse;
+use ohsl::sparse::Sparse;
 
 fn main() {
     println!( "------------------ Sparse linear system ------------------" );
@@ -31,10 +31,18 @@ fn main() {
     let dense_x = a.solve_basic( &b );
     println!( "  * The dense system gives the solution vector");
     println!( "  * x^T ={}", dense_x );
-    let mut sparse = Sparse::from_triplets( triplets );
-    let sparse_x = sparse.solve( b ).unwrap();
+    let sparse = Sparse::<f64>::from_triplets( n, n, &mut triplets );
+    //let sparse_x = sparse.solve( b ).unwrap();
+    let mut sparse_x = Vector::<f64>::new( n, 0.0 );
+    let max_iter = 1000;
+    let tol = 1e-8;
+    let result = sparse.solve_bicgstab( &b, &mut sparse_x, max_iter, tol );
     println!( "  * The sparse system gives the solution vector");
     println!( "  * x^T ={}", sparse_x );
+    match result {
+        Ok( iter ) => println!( "  * The sparse system converged in {} iterations.", iter ),
+        Err( error ) => println!( "  * The sparse system failed to converge, error = {}", error )
+    }
     let diff = dense_x - sparse_x;
     println!( "  * The maximum difference between the two is {:+.2e}", diff.norm_inf() );
     println!( "-------------------- FINISHED ---------------------" );

@@ -4,7 +4,7 @@ extern crate ohsl;
 
 pub use ohsl::vector::{Vector, Vec64};
 pub use ohsl::matrix::{Matrix, Mat64};
-pub use ohsl::sparse_matrix::Sparse;
+use ohsl::sparse::Sparse;
 
 use std::time::Instant;
 
@@ -76,15 +76,22 @@ fn main() {
         }
     }
     // Create the sparse matrix from the triplets
-    let mut sparse = Sparse::from_triplets( triplets );
+    let sparse = Sparse::<f64>::from_triplets( size, size, &mut triplets );
     let duration = start.elapsed();
     println!("  * Time to create the matrix: {:?}", duration);
     // Solve the sparse system
-    let u = sparse.solve( rhs ).unwrap();
+    let mut u_guess = Vector::<f64>::random( size ); // A better guess would improve convergence
+    let max_iter = 1000;
+    let tol = 1e-8;
+    let result = sparse.solve_qmr( &rhs, &mut u_guess, max_iter, tol );
     // Output time and error
     let duration = start.elapsed();
+    match result {
+        Ok( iter ) => println!( "  * The sparse system converged in {} iterations.", iter ),
+        Err( error ) => println!( "  * The sparse system failed to converge, error = {}", error )
+    }
     println!("  * Time to solve the system: {:?}", duration);
-    let u_diff = u - u_exact;
+    let u_diff = u_guess - u_exact;
     println!("  * Solution error = {}", u_diff.norm_2() );
     println!( "-------------------- FINISHED ---------------------" );
 }

@@ -8,8 +8,8 @@ impl<T: std::cmp::PartialEq> Vector<T> {
     pub fn find(&self, value: T ) -> usize {
         let index = self.vec.iter().position( |x| *x == value );
         match index {
-            None => panic!( "Entry not found in Vector." ),
             Some(index) => return index,
+            None => self.size() - 1, // If not found return last index
         }
     }
 }
@@ -83,7 +83,7 @@ impl<T: Copy + Number> Vector<T> {
     }
 }
 
-impl<T: Clone + Signed> Vector<T> {
+impl<T: Clone + Signed + Number> Vector<T> {
     /// Return a vector containing the absolute values of the elements 
     #[inline]
     pub fn abs(&self) -> Self {
