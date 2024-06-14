@@ -26,6 +26,12 @@ fn get_col() {
     let u: Vector<i32> = m.get_col( 0 );
     assert_eq!( u[0], 1 );
     assert_eq!( u[1], 4 );
+    let v: Vector<i32> = m.get_col( 1 );
+    assert_eq!( v[0], 2 );
+    assert_eq!( v[1], 5 );
+    let w: Vector<i32> = m.get_col( 2 );
+    assert_eq!( w[0], 3 );
+    assert_eq!( w[1], 6 );
 }
 
 #[test]

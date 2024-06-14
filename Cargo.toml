@@ -1,6 +1,6 @@
 [package]
 name = "ohsl"
-version = "0.10.3"
+version = "0.10.4"
 authors = ["anthonyoneill <ajoneill@protonmail.com>"]
 edition = "2021"
 description = "A collection of numerical routines and mathematical types for use in scientific computing."

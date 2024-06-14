@@ -45,21 +45,22 @@ impl<T: Copy + Number + std::fmt::Debug> Sparse<T> {
     pub fn from_triplets( rows: usize, cols: usize, triplets: &mut Vec<(usize, usize, T)> ) -> Self {
         // Sort the triplets for column major ordering
         triplets.sort_by_key( |triplet| triplet.1 ); // Sort by column first 
+        //TODO remove duplicate entries ???
         let mut row_index = vec![];
         let mut col_index = vec![];
         let mut val = vec![];
         let mut nonzero = 0;
-        for triplet in triplets.iter() {
+        for triplet in triplets.drain(..) { // Drain the triplets vector so we don't keep a copy
             let row = triplet.0;
             let col = triplet.1;
             if row >= rows { panic!( "Sparse matrix from_triplets: row range error." ); }
             if col >= cols { panic!( "Sparse matrix from_triplets: col range error." ); }
-            //TODO check for duplicate entries
             row_index.push( triplet.0 );
             col_index.push( triplet.1 );
             val.push( triplet.2 );
             nonzero += 1;
         }
+        println!( "triplets.len(): {}", triplets.len() );
         let mut sparse = Self {
             rows,
             cols,
