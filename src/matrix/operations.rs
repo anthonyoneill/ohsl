@@ -46,7 +46,7 @@ impl<T: Clone + Copy + Number> Matrix<T> {
     /// Get a column of the matrix as a vector 
     #[inline]
     pub fn get_col(&self, col: usize ) -> Vector<T> {
-        if self.rows <= col { panic!( "Matrix range error in get_col" ); }
+        if self.cols <= col { panic!( "Matrix range error in get_col" ); }
         let mut result = Vector::<T>::new( self.rows, T::zero() );
         for i in 0..self.rows {
             result[ i ] = self.mat[ i * self.cols + col ];

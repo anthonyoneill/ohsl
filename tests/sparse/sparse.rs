@@ -110,6 +110,7 @@ fn triplet_sparse2() {
     triplets.push( (2, 2, 5.0) );
     triplets.push( (3, 2, 1.0) );
     let s = Sparse::<f64>::from_triplets( 5, 5, &mut triplets );
+    assert_eq!( triplets.len(), 0 ); // The triplets are consumed
     assert_eq!( s.get( 0, 0 ), Some( 3.0 ) );
     assert_eq!( s.get( 1, 1 ), Some( 4.0 ) );
     assert_eq!( s.get( 2, 1 ), Some( 7.0 ) );
