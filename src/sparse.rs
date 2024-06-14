@@ -60,7 +60,6 @@ impl<T: Copy + Number + std::fmt::Debug> Sparse<T> {
             val.push( triplet.2 );
             nonzero += 1;
         }
-        println!( "triplets.len(): {}", triplets.len() );
         let mut sparse = Self {
             rows,
             cols,
