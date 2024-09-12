@@ -43,7 +43,7 @@ dependencies = [
 
 [[package]]
 name = "ohsl"
-version = "0.10.5"
+version = "0.10.6"
 dependencies = [
  "num_cpus",
  "rand",

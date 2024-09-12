@@ -71,10 +71,15 @@ impl<T> fmt::Debug for Matrix<T> where
 {
     /// Format the output 
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for i in 0..self.rows-1 {
-            writeln!(f, "\t{:?}", self.mat[i] ).unwrap();
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                write!(f, "\t{:?}", self.mat[i*self.cols + j] ).unwrap();
+            }
+            if i < self.rows-1 {
+                writeln!(f, "").unwrap();
+            }
         }
-        write!(f, "\t{:?}", self.mat[self.rows-1] )
+        write!(f, "")
     }
 }
 
@@ -83,10 +88,15 @@ impl<T> fmt::Display for Matrix<T> where
 {
     /// Format the output 
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        for i in 0..self.rows-1 {
-            writeln!(f, "\t{:?}", self.mat[i] ).unwrap();
+        for i in 0..self.rows {
+            for j in 0..self.cols {
+                write!(f, "\t{:?}", self.mat[i*self.cols + j] ).unwrap();
+            }
+            if i < self.rows-1 {
+                writeln!(f, "").unwrap();
+            }
         }
-        write!(f, "\t{:?}", self.mat[self.rows-1] )
+        write!(f, "")
     }
 } 
 
