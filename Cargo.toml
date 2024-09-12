@@ -1,6 +1,6 @@
 [package]
 name = "ohsl"
-version = "0.10.5"
+version = "0.10.6"
 authors = ["anthonyoneill <ajoneill@protonmail.com>"]
 edition = "2021"
 description = "A collection of numerical routines and mathematical types for use in scientific computing."
@@ -12,6 +12,7 @@ readme = "README.md"
 
 [dependencies]
 rand = "0.8.5"
+num_cpus = "1.16.0"
 
 [package.metadata.docs.rs]
 cargo-args = ["-Zunstable-options", "-Zrustdoc-scrape-examples"]

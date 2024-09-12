@@ -5,6 +5,7 @@ extern crate ohsl;
 pub use ohsl::vector::{Vector, Vec64};
 pub use ohsl::constant::*;
 
+use std::time::{Instant, Duration};
 
 fn main() {
     println!("----- Vector algebra -----");
@@ -62,6 +63,64 @@ fn main() {
     let b = Vec64::powspace( 0.0, 1.0, 5, 1.5 );
     println!( "  * Linearly spaced elements = {}", a );
     println!( "  * Power law spaced elements (p=1.5) = {}", b );
+
+    // Test vector dot product parallel performance
+    println!( "  * i \t n=2^i \t\t time seq \t time par \t speedup \t time mixed \t speedup" );
+    let num_runs = 100;
+    for i in 8..18 {
+        let n: usize = 2usize.pow(i);
+        let t_seq = dot_seq_avg( n, num_runs );
+        let t_par = dot_par_avg( n, num_runs );
+        let t_mixed = dot_mixed_avg( n, num_runs );
+        let speedup_par = t_seq.as_secs_f64() / t_par.as_secs_f64();
+        let speedup_mixed = t_seq.as_secs_f64() / t_mixed.as_secs_f64();
+        println!( "  * {} \t {:0>6} \t {:.2?} \t {:.2?} \t {:.6} \t {:.2?} \t {:.6}",
+                    i, n, t_seq, t_par, speedup_par, t_mixed, speedup_mixed );
+    }
+    //TODO it would be cool to have an Option for Sequential/Parallel/Mixed in the dot function and
+    //places it is used.
     println!( "--- FINISHED ---" );
 }
 
+fn dot_seq_avg( n: usize, num_runs: u32 ) -> Duration {
+    let mut sum = Duration::ZERO;
+    for _ in 0..num_runs {
+        let x = Vec64::random( n );
+        let y = Vec64::random( n );
+        let now = Instant::now();
+        let _dot_seq = x.dot( &y );
+        let t_seq = now.elapsed();
+        sum += t_seq;
+    }
+    sum / num_runs
+}
+
+fn dot_par_avg( n: usize, num_runs: u32 ) -> Duration {
+    let mut sum = Duration::ZERO;
+    for _ in 0..num_runs {
+        let x = Vec64::random( n );
+        let y = Vec64::random( n );
+        let now = Instant::now();
+        let _dot_par = x.dot_f64( &y );
+        let t_par = now.elapsed();
+        sum += t_par;
+    }
+    sum / num_runs
+}
+
+fn dot_mixed_avg( n: usize, num_runs: u32 ) -> Duration {
+    let mut sum = Duration::ZERO;
+    for _ in 0..num_runs {
+        let x = Vec64::random( n );
+        let y = Vec64::random( n );
+        let now = Instant::now();
+        if n < 2usize.pow(15) {
+            let _dot_seq = x.dot( &y );
+        } else {
+            let _dot_par = x.dot_f64( &y );
+        }
+        let t_mixed = now.elapsed();
+        sum += t_mixed;
+    }
+    sum / num_runs
+}

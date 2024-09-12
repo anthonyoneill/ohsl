@@ -58,7 +58,7 @@ impl Vector<f64> {
         result
     }
 
-    // Create a vector containing n random elements between 0 and 1
+    /// Create a vector containing n random elements between 0 and 1
     #[inline]
     pub fn random( size: usize ) -> Self {
         let mut vec = vec![ 0.0; size ];
@@ -67,5 +67,43 @@ impl Vector<f64> {
             vec[i] = rng.gen::<f64>()
         }
         Vector{ vec }
+    }
+
+    /// Return the dot product of two vectors v.dot(w) of f64s
+    #[inline]
+    pub fn dot_f64(&self, w: &Vector<f64>) -> f64 {
+        if self.size() != w.size() { panic!( "Vector sizes do not agree dot()." ); }
+        let num_threads = num_cpus::get();
+        /*if num_threads < self.size() || num_threads == 1 {
+            let mut result: f64 = 0.0;
+            for i in 0..self.size() {
+                result += self.vec[i] * w.vec[i];
+            }
+            return result;
+        }*/
+        let chunk_size = self.size() / num_threads;
+        std::thread::scope(|s| {
+            let mut threads = Vec::new();
+            for i in 0..num_threads {
+                let start = i * chunk_size;
+                let end = if i == num_threads - 1 { self.size() } else { (i + 1) * chunk_size };
+                let self_slice = &self.vec[start..end];
+                let w_slice = &w.vec[start..end];
+                
+                threads.push( s.spawn(|| {
+                    let mut result: f64 = 0.0;
+                    for i in 0..self_slice.len() {
+                        result += self_slice[i] * w_slice[i];
+                    }
+                    result
+                }));
+            }
+
+            let mut result: f64 = 0.0;
+            for thread in threads {
+                result += thread.join().unwrap();
+            }
+            result
+        })
     }
 }
