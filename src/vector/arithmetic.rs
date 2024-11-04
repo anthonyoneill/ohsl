@@ -16,36 +16,33 @@ impl<T: Clone + Neg<Output = T>> Neg for Vector<T> {
     }
 }
 
-impl<T: Clone + Number> Add<Vector<T>> for Vector<T> {
+// Non-consuming addition
+impl<T: Clone + Number + Copy> Add<&Vector<T>> for Vector<T> {
     type Output = Self;
     /// Add the elements of two vectors together ( binary + )
     #[inline]
-    fn add(self, plus: Self) -> Self::Output {
+    fn add(self, plus: &Self) -> Self::Output {
         if self.size() != plus.size() { panic!( "Vector sizes do not agree (+)." ); }
         let mut result = Vec::new();
         for i in 0..self.size() {
-            result.push( self.vec[i].clone() + plus.vec[i].clone() );
+            result.push( self.vec[i] + plus.vec[i] );
         }
         Self::Output::create( result )
     }
 }
 
-/*impl<T: Clone + Number> Sub<Vector<T>> for Vector<T> {
+// Consuming addition
+impl<T: Clone + Number + Copy> Add<Vector<T>> for Vector<T> {
     type Output = Self;
-    /// Subtract the elements of one vector from another ( binary - )
+    /// Add the elements of two vectors together ( binary + )
     #[inline]
-    fn sub(self, minus: Self) -> Self::Output {
-        if self.size() != minus.size() { panic!( "Vector sizes do not agree (-)." ); }
-        let mut result = Vec::new();
-        for i in 0..self.size() {
-            result.push( self.vec[i].clone() - minus.vec[i].clone() );
-        }
-        Self::Output::create( result )
+    fn add(self, plus: Self) -> Self::Output {
+        self + &plus
     }
-}*/
+}
 
 // Non-consuming subtraction
-impl<T: Clone + Number> Sub<&Vector<T>> for Vector<T> {
+impl<T: Clone + Number + Copy> Sub<&Vector<T>> for Vector<T> {
     type Output = Self;
     /// Subtract the elements of one vector from another ( binary - )
     #[inline]
@@ -53,14 +50,14 @@ impl<T: Clone + Number> Sub<&Vector<T>> for Vector<T> {
         if self.size() != minus.size() { panic!( "Vector sizes do not agree (-)." ); }
         let mut result = Vec::new();
         for i in 0..self.size() {
-            result.push( self.vec[i].clone() - minus.vec[i].clone() );
+            result.push( self.vec[i] - minus.vec[i] );
         }
         Self::Output::create( result )
     }
 }
 
 // Consuming subtraction
-impl<T: Clone + Number> Sub<Vector<T>> for Vector<T> {
+impl<T: Clone + Number + Copy> Sub<Vector<T>> for Vector<T> {
     type Output = Self;
     /// Subtract the elements of one vector from another ( binary - )
     #[inline]
