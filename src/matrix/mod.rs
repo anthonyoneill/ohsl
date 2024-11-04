@@ -105,11 +105,13 @@ impl<T: fmt::Display> Matrix<T> {
     #[inline]
     pub fn output(&self, filename: &str) {
         let mut f = File::create(filename).expect("Unable to create file");
-        for i in 0..self.rows {  
+        for i in 0..self.rows {
             for j in 0..self.cols {
                 write!(f, "\t{}", self.mat[i*self.cols + j] ).unwrap();
-            }                                                                                                                                                                
-            writeln!(f, "").unwrap();                                                                                                                            
+            }
+            if i < self.rows-1 {
+                writeln!(f, "").unwrap();
+            }
         }
     }
 }
