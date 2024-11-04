@@ -293,7 +293,7 @@ impl<T: Clone + Neg<Output = T>> Neg for Tridiagonal<T> {
     }
 }
 
-impl<T: Clone + Number> Add<Tridiagonal<T>> for Tridiagonal<T> {
+impl<T: Clone + Number + Copy> Add<Tridiagonal<T>> for Tridiagonal<T> {
     type Output = Self;
     /// Add the elements of two tridiagonal matrices together ( binary + )
     #[inline]
@@ -307,7 +307,7 @@ impl<T: Clone + Number> Add<Tridiagonal<T>> for Tridiagonal<T> {
     }
 }
 
-impl<T: Clone + Number> Sub<Tridiagonal<T>> for Tridiagonal<T> {
+impl<T: Clone + Number + Copy> Sub<Tridiagonal<T>> for Tridiagonal<T> {
     type Output = Self;
     /// Subtract the elements of one tridiagonal matrix from another ( binary - )
     #[inline]

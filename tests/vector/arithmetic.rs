@@ -17,6 +17,15 @@ fn binary_addition() {
 }
 
 #[test]
+fn non_consuming_addition() {
+    let u = Vector::<i32>::new( 10, 3 );
+    let v = Vector::<i32>::new( 10, 4 );
+    let w = u + &v;
+    assert_eq!( w[0], 7 );
+    assert_eq!( w.size(), 10 );
+}
+
+#[test]
 fn binary_subtraction() {
     let u = Vector::<i32>::new( 10, 3 );
     let v = Vector::<i32>::new( 10, 4 );
