@@ -26,6 +26,16 @@ fn non_consuming_addition() {
 }
 
 #[test]
+fn full_non_consuming_addition() {
+    let mut u = Vector::<i32>::new( 10, 3 );
+    let v = Vector::<i32>::new( 10, 4 );
+    let w = &u + &v;
+    assert_eq!( w[0], 7 );
+    assert_eq!( w.size(), 10 );
+    u[0] = 5;
+}
+
+#[test]
 fn binary_subtraction() {
     let u = Vector::<i32>::new( 10, 3 );
     let v = Vector::<i32>::new( 10, 4 );
@@ -41,6 +51,16 @@ fn non_consuming_subtraction() {
     let w = u - &v;
     assert_eq!( w[0], -1 );
     assert_eq!( w.size(), 10 );
+}
+
+#[test]
+fn full_non_consuming_subtraction() {
+    let mut u = Vector::<i32>::new( 10, 3 );
+    let v = Vector::<i32>::new( 10, 4 );
+    let w = &u - &v;
+    assert_eq!( w[0], -1 );
+    assert_eq!( w.size(), 10 );
+    u[0] = 5;
 }
 
 #[test]
