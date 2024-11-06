@@ -43,7 +43,11 @@ dependencies = [
 
 [[package]]
 name = "ohsl"
+<<<<<<< HEAD
 version = "0.10.8"
+=======
+version = "0.10.7"
+>>>>>>> dc13877 (Cargo.lock diff)
 dependencies = [
  "num_cpus",
  "rand",
