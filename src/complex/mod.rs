@@ -6,7 +6,7 @@ use core::ops::{Add, Div, Mul, Neg, Sub};
 use core::ops::{AddAssign, SubAssign, MulAssign, DivAssign};
 use std::{fmt, cmp::Ordering};
 
-pub use crate::traits::{Number, Signed, Zero, One};
+pub use crate::traits::{Number, Signed, Zero, One, Tiny};
 
 pub struct Complex<T> {
     /// Real part of the complex number
@@ -235,6 +235,13 @@ impl<T: Clone + Number> One for Complex<T> {
     /// Return the multiplicative identity z = 1 + 0i
     fn one() -> Self {
         Self::new(One::one(), Zero::zero())
+    }
+}
+
+impl<T: Clone + Number> Tiny for Complex<T> {
+    /// Return a very small complex number z = tiny + tiny*i
+    fn tiny() -> Self {
+        Self::new(T::tiny(), T::tiny())
     }
 }
 

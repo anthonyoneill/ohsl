@@ -17,6 +17,7 @@ pub mod polynomial;
 pub mod tridiagonal;
 pub mod banded;
 pub mod sparse;
+pub mod ode_bvp;
 
 // Re-exports
 pub use self::complex::{Complex, Cmplx};
@@ -30,3 +31,4 @@ pub use self::polynomial::Polynomial;
 pub use self::tridiagonal::Tridiagonal;
 pub use self::banded::Banded;
 pub use self::sparse::Sparse;
+pub use self::ode_bvp::ODEBVP;

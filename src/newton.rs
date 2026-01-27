@@ -81,7 +81,7 @@ impl Newton<Cmplx> {
         for _ in 0..self.max_iter {
             let deriv = ( func( current + Cmplx::new(self.delta, 0.0) ) - 
                           func( current - Cmplx::new(self.delta, 0.0) ) ) / ( 2.0 * self.delta );
-            println!("current: {}, deriv: {}", current, deriv);
+            //println!("current: {}, deriv: {}", current, deriv);
             let dx = func(current) / deriv;
             current -= dx;
             if dx.abs() <= self.tol {

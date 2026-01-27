@@ -42,9 +42,14 @@ pub trait One: Sized + Mul<Self, Output = Self> {
     /// Returns the multiplicative identity element 1
     fn one() -> Self;
 }
+
+pub trait Tiny: Sized {
+    /// Returns a very small value for the type
+    fn tiny() -> Self;
+}
    
 
-pub trait Number: PartialEq + Sized + Operations + AssignOperations + Zero + One
+pub trait Number: PartialEq + Sized + Operations + AssignOperations + Zero + One + Tiny
 {
 
 }
@@ -68,6 +73,8 @@ impl_identity!( Zero for f32 f64, zero, 0.0 );
 impl_identity!( One for f32 f64, one, 1.0 );
 impl_identity!( Zero for usize u8 u16 u32 u64 isize i8 i16 i32 i64, zero, 0 );
 impl_identity!( One for usize u8 u16 u32 u64 isize i8 i16 i32 i64, one, 1 );
+impl_identity!( Tiny for f32 f64, tiny, 1.0e-40 );
+impl_identity!( Tiny for usize u8 u16 u32 u64 isize i8 i16 i32 i64, tiny, 0 );
 
 macro_rules! impl_signed {
     ($($t:ty)*, $v: expr) => ($(
