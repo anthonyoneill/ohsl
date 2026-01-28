@@ -51,7 +51,7 @@ impl<T> Banded<T> {
     }
 }
 
-impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
+impl<T: Clone + Copy + Number + Signed + PartialOrd + Neg<Output = T>> Banded<T> {
     /// Create a new banded matrix of specified size and fill it with a constant value
     #[inline]
     pub fn new( n: usize, m1: usize, m2: usize, value: T ) -> Self {
@@ -91,54 +91,46 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
     fn decompose(&self, au: &mut Matrix<T>, al: &mut Matrix<T>, index: &mut Vector<usize>, d: &mut T ) {
         let mm = self.m1 + self.m2 + 1;
         let mut l = self.m1;
+
         for i in 0..self.m1 {
-            for j in self.m1 - i..mm {
-                //au[ i ][ j - l ] = au[ i ][ j ];
+            for j in (self.m1 - i)..mm {
                 au[(i, j - l)] = au[(i, j)];
             }
             l -= 1;
-            for j in mm - l - 1..mm {
-                //au[ i ][ j ] = T::zero();
+            for j in (mm - l - 1)..mm {
                 au[(i, j)] = T::zero();
             }
         }
         *d = T::one();
         l = self.m1;
         for k in 0..self.n {
-            //let mut dum = au[ k ][ 0 ];
             let mut dum = au[(k, 0)];
             let mut i = k;
             if l < self.n { l += 1; }
-            for j in k + 1..l {
-                //if au[ j ][ 0 ] > dum {
-                if au[(j, 0)] > dum {
-                    //dum = au[ j ][ 0 ];
+            for j in (k + 1)..l {
+                if au[(j, 0)].abs() > dum.abs() {
                     dum = au[(j, 0)];
                     i = j;
                 }
             }
             index[ k ] = i + 1;
-            //if dum == T::zero() { au[ k ][ 0 ] = T::zero(); }
-            if dum == T::zero() { au[(k, 0)] = T::zero();} 
+            if dum == T::zero() { au[(k, 0)] = T::tiny();}
             if i != k {
                 *d = -*d;
                 for j in 0..mm {
                     au.swap_elem( k, j, i, j )
                 }
             }
-            for i in k + 1..l {
-                //dum = au[ i ][ 0 ] / au[ k ][ 0 ];
+            for i in (k + 1)..l {
                 dum = au[(i, 0)] / au[(k, 0)];
-                //al[ k ][ i - k - 1 ] = dum;
                 al[(k, i - k - 1)] = dum;
                 for j in 1..mm {
-                    //au[ i ][ j - 1 ] = au[ i ][ j ] - dum * au[ k ][ j ];
                     au[(i, j - 1)] = au[(i, j)] - dum * au[(k, j)];
                 }
-                //au[ i ][ mm - 1 ] = T::zero();
                 au[(i, mm - 1)] = T::zero();
             }
         }
+        
 
     }     
 
@@ -181,7 +173,6 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
             if l < self.n { l += 1; }
             for j in k + 1..l {
                 let xk = x[ k ];
-                //x[ j ] -= al[ k ][ j - k - 1 ] * xk;
                 x[ j ] -= al[(k, j - k - 1)] * xk;
             }
         }
@@ -189,10 +180,8 @@ impl<T: Clone + Copy + Number + PartialOrd + Neg<Output = T>> Banded<T> {
         for i in (0..self.n).rev() {
             let mut dum = x[ i ].clone();
             for k in 1..l {
-                //dum -= au[ i ][ k ] * x[ k + i ];
                 dum -= au[(i, k)] * x[ k + i ];
             }
-            //x[ i ] = dum / au[ i ][ 0 ];
             x[ i ] = dum / au[(i, 0)];
             if l < mm { l += 1; }
         }

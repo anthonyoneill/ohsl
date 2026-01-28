@@ -21,3 +21,6 @@ mod sparse;
 
 #[path = "polynomial/polynomial.rs"]
 mod polynomial;
+
+#[path = "ode_bvp/ode_bvp.rs"]
+mod ode_bvp;
