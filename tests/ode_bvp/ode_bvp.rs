@@ -1,5 +1,5 @@
 use ohsl::ode_bvp::ODEBVP;
-use ohsl::vector::Vec64;
+use ohsl::vector::{Vec64, Vector};
 use ohsl::constant::PI;
 use ohsl::matrix::Mat64;
 
@@ -33,15 +33,17 @@ fn airyfunc( y: &Vec64, x: &f64 ) -> Vec64 {
     f
 }
 
-fn plate_bc( y: &Vec64 ) -> Vec64 {
-    let mut bc = Vec64::new( 1, 0.0 );
-    bc[0] = y[0];       // y(0) = 0
+fn plate_bc( y: &Vec64 ) -> Vector<Option<f64>> {
+    let mut bc = Vector::<Option<f64>>::new( 2, None );
+    bc[0] = Some( y[0] );       // y(0) = 0
+    bc[1] = None;               // y'(0) free
     bc
 }
 
-fn free_bc( y: &Vec64 ) -> Vec64 {
-    let mut bc = Vec64::new( 1, 0.0 );
-    bc[0] = y[0] - 1.0; // y(inf) = 1
+fn free_bc( y: &Vec64 ) -> Vector<Option<f64>> {
+    let mut bc = Vector::<Option<f64>>::new( 2, None );
+    bc[0] = Some( y[0] - 1.0 ); // y(inf) = 1
+    bc[1] = None;               // y'(inf) free
     bc
 }
 
@@ -86,15 +88,17 @@ fn equation( y: &Vec64, _x: &f64 ) -> Vec64 {
     f
 }
 
-fn zero_bc( y: &Vec64 ) -> Vec64 {
-    let mut bc = Vec64::new( 1, 0.0 );
-    bc[0] = y[0];       // y(0) = 0
+fn zero_bc( y: &Vec64 ) -> Vector<Option<f64>> {
+    let mut bc = Vector::<Option<f64>>::new( 2, None );
+    bc[0] = Some( y[0] );       // y(0) = 0
+    bc[1] = None;               // y'(0) free
     bc
 }
 
-fn one_bc( y: &Vec64 ) -> Vec64 {
-    let mut bc = Vec64::new( 1, 0.0 );
-    bc[0] = y[0] - PI; // y(1) = pi
+fn one_bc( y: &Vec64 ) -> Vector<Option<f64>> {
+    let mut bc = Vector::<Option<f64>>::new( 2, None );
+    bc[0] = Some( y[0] - PI ); // y(1) = pi
+    bc[1] = None;              // y'(1) free
     bc
 }
 

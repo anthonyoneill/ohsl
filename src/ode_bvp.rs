@@ -9,7 +9,6 @@ pub struct ODEBVP<T> {
     pub max_iter: usize,            // Maximum number of iterations
     pub tol: f64,                   // Tolerance for convergence
     pub delta: f64,                 // Finite difference step size
-    //pub nodes: Vector<f64>,         // Vector of nodes ( defines the domain )
     pub solution: Mesh1D<T, f64>,   // Solution mesh
 }   
 
@@ -46,8 +45,8 @@ impl<T: Clone + Number> ODEBVP<T> {
 impl ODEBVP<f64> {
     pub fn solve(&mut self, 
         eqn: &dyn Fn(&Vec64, &f64) -> Vec64, 
-        bc_left: &dyn Fn(&Vec64) -> Vec64, 
-        bc_right: &dyn Fn(&Vec64) -> Vec64, 
+        bc_left: &dyn Fn(&Vec64) -> Vector<Option<f64>>,
+        bc_right: &dyn Fn(&Vec64) -> Vector<Option<f64>>,
         jacobian: Option<&dyn Fn(&Vec64, &f64) -> Mat64>
     ) -> Result<(), f64> {
         //TODO should probably check sizes of eqn, bc_left, bc_right here
@@ -59,15 +58,10 @@ impl ODEBVP<f64> {
         let off_diag = 2 * order - 1;
         let mut a_mat = Banded::<f64>::new( size, off_diag, off_diag, 0.0 );
         let mut b_vec = Vec64::new( size, 0.0 );
-        //let mut sol = Vec64::new( size, 0.0 );      // Vector for storing the solution
 
         for _iter in 0..self.max_iter {
-
             self.assemble_matrix_problem( eqn, bc_left, bc_right, jacobian, &mut a_mat, &mut b_vec );
-
             let sol = a_mat.solve( &b_vec );
-            //println!( "Solution increment: {:?}", sol );
-
             // Update the solution mesh
             for i in 0..n {
                 for j in 0..order {
@@ -75,7 +69,6 @@ impl ODEBVP<f64> {
                 }
                 
             }
-
             max_residual = b_vec.norm_inf();
             //println!( "max residual: {:.2e}", max_residual );
             
@@ -90,15 +83,14 @@ impl ODEBVP<f64> {
 
     fn assemble_matrix_problem( &mut self, 
         eqn: &dyn Fn(&Vec64, &f64) -> Vec64, 
-        bc_left: &dyn Fn(&Vec64) -> Vec64, 
-        bc_right: &dyn Fn(&Vec64) -> Vec64,
+        bc_left: &dyn Fn(&Vec64) -> Vector<Option<f64>>, 
+        bc_right: &dyn Fn(&Vec64) -> Vector<Option<f64>>,
         jacobian: Option<&dyn Fn(&Vec64, &f64) -> Mat64>,
         a: &mut Banded<f64>,
         b: &mut Vec64 
     ) {
         let order = self.solution.nvars();
         let n = self.solution.nodes().size();
-        //let size = n * order;
 
         a.fill( 0.0 );          // Clear the matrix
         b.assign( 0.0 );        // Clear the rhs vector
@@ -106,17 +98,14 @@ impl ODEBVP<f64> {
 
         // Left boundary condition
         let bc_left_guess: Vec64 = self.solution.get_nodes_vars( 0 );
-        let bc_left_residual: Vec64 = bc_left( &bc_left_guess );
-        //println!("Left BC residual: {:?}", bc_left_residual);
+        let bc_left_residual: Vector<Option<f64>> = bc_left( &bc_left_guess );
 
-        for i in 0..bc_left_residual.size() {
-            /*for var in 0..order {
-                a[ ( row, var ) ] = 0.0; //TODO Jacobian of left BCs
-            }*/
-            //println!("Setting A row {}, col {} for left BC", row, i );
-            a[ ( row, i ) ] = 1.0; // Placeholder
-            b[ row ] = -bc_left_residual[ i ];
-            row += 1;
+        for i in 0..order {
+            if let Some( res ) = bc_left_residual[ i ] {
+                a[ ( row, i ) ] = 1.0;
+                b[ row ] = -res;
+                row += 1;
+            }
         }
 
         // Interior nodes
@@ -180,21 +169,17 @@ impl ODEBVP<f64> {
             
         }
 
-        // Right boundary condition
+        // Right boundary conditions
         let bc_right_guess: Vec64 = self.solution.get_nodes_vars( n - 1 );
-        let bc_right_residual: Vec64 = bc_right( &bc_right_guess );
-        //println!("Right BC residual: {:?}", bc_right_residual);
+        let bc_right_residual: Vector<Option<f64>> = bc_right( &bc_right_guess );
 
-        for i in 0..bc_right_residual.size() {
-            /*for var in 0..order {
-                a[ ( row, ( ( n - 1 ) * order ) + var ) ] = 0.0; //TODO Jacobian of right BCs
-            }*/
-            //println!("Setting A row {}, col {} for right BC", row, ( ( n - 1 ) * order ) + i );
-            a[ ( row, ( ( n - 1 ) * order ) + i ) ] = 1.0; // Placeholder
-            b[ row ] = -bc_right_residual[ i ];
-            row += 1;
+        for i in 0..order {
+            if let Some( res ) = bc_right_residual[ i ] {
+                a[ ( row, ( ( n - 1 ) * order ) + i ) ] = 1.0;
+                b[ row ] = -res;
+                row += 1;
+            }
         }
-
     }
 
 }
