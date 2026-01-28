@@ -47,8 +47,8 @@ impl ODEBVP<f64> {
     pub fn solve(&mut self, 
         eqn: &dyn Fn(&Vec64, &f64) -> Vec64, 
         bc_left: &dyn Fn(&Vec64) -> Vec64, 
-        bc_right: &dyn Fn(&Vec64) -> Vec64 
-        //TODO optional jacobian function
+        bc_right: &dyn Fn(&Vec64) -> Vec64, 
+        jacobian: Option<&dyn Fn(&Vec64, &f64) -> Mat64>
     ) -> Result<(), f64> {
         //TODO should probably check sizes of eqn, bc_left, bc_right here
         let order = self.solution.nvars();
@@ -63,7 +63,7 @@ impl ODEBVP<f64> {
 
         for _iter in 0..self.max_iter {
 
-            self.assemble_matrix_problem( eqn, bc_left, bc_right, &mut a_mat, &mut b_vec );
+            self.assemble_matrix_problem( eqn, bc_left, bc_right, jacobian, &mut a_mat, &mut b_vec );
 
             let sol = a_mat.solve( &b_vec );
             //println!( "Solution increment: {:?}", sol );
@@ -77,7 +77,7 @@ impl ODEBVP<f64> {
             }
 
             max_residual = b_vec.norm_inf();
-            println!( "max residual: {:.2e}", max_residual );
+            //println!( "max residual: {:.2e}", max_residual );
             
             if max_residual <= self.tol {
                 return Ok( () )
@@ -92,7 +92,7 @@ impl ODEBVP<f64> {
         eqn: &dyn Fn(&Vec64, &f64) -> Vec64, 
         bc_left: &dyn Fn(&Vec64) -> Vec64, 
         bc_right: &dyn Fn(&Vec64) -> Vec64,
-        //TODO optional jacobian function
+        jacobian: Option<&dyn Fn(&Vec64, &f64) -> Mat64>,
         a: &mut Banded<f64>,
         b: &mut Vec64 
     ) {
@@ -136,18 +136,23 @@ impl ODEBVP<f64> {
 
             let mut jac = Mat64::new( order, order, 0.0 );
 
-            // Jacobian at the midpoint i + 1/2 via finite differences
-            for alpha in 0..order {
-                for beta in 0..order {
-                    let mut delta = Vec64::new( order, 0.0 );
-                    delta[ beta ] = self.delta;
-                    let y_g_i_half_star = &y_g_i_half + &delta;
+            if let Some(jacobian_func) = jacobian {
+                // Use provided Jacobian function
+                jac = jacobian_func( &y_g_i_half, &x_i_half );
+            } else {
+                // Approximate Jacobian at the midpoint i + 1/2 via finite differences
+                for alpha in 0..order {
+                    for beta in 0..order {
+                        let mut delta = Vec64::new( order, 0.0 );
+                        delta[ beta ] = self.delta;
+                        let y_g_i_half_star = &y_g_i_half + &delta;
 
-                    // Perturbed function evaluation at i + 1/2
-                    let f_fun_star = eqn( &y_g_i_half_star, &x_i_half );
+                        // Perturbed function evaluation at i + 1/2
+                        let f_fun_star = eqn( &y_g_i_half_star, &x_i_half );
 
-                    // Approximate Jacobian entry
-                    jac[( alpha, beta )] = ( f_fun_star[ alpha ] - f_fun[ alpha ] ) / self.delta;
+                        // Approximate Jacobian entry
+                        jac[( alpha, beta )] = ( f_fun_star[ alpha ] - f_fun[ alpha ] ) / self.delta;
+                    }
                 }
             }
 
