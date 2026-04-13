@@ -97,3 +97,17 @@ fn divide_assign() {
     u /= 2.0;
     assert_eq!( u[0], 1.5 );
 }
+
+#[test]
+fn multiply_scalar() {
+    let u = Vector::<f64>::new( 5, 3.0 );
+    let v = 2.0 * u;
+    assert_eq!( v[0], 6.0 );
+}
+
+#[test]
+fn multiply_scalar_ref() {
+    let u = Vector::<f64>::new( 5, 3.0 );
+    let v = 2.0 * &u;
+    assert_eq!( v[0], 6.0 );
+}

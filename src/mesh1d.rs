@@ -22,6 +22,12 @@ impl<T: Clone + Number, X: Clone + Number + Copy> Mesh1D<T, X> {
         Mesh1D { nvars, nodes, vars }
     }
 
+    /// Create an empty 1D mesh (no nodes, no variables)
+    #[inline]
+    pub fn empty() -> Self {
+        Mesh1D { nvars: 0, nodes: Vector::<X>::empty(), vars: Vec::new() }
+    }
+
     /// Return the number of nodal points in the mesh 
     #[inline]
     pub fn nnodes(&self) -> usize {

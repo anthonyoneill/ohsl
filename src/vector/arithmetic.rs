@@ -112,6 +112,19 @@ impl Mul<Vector<f64>> for f64 {
     }
 }
 
+impl Mul<&Vector<f64>> for f64 {
+    type Output = Vector<f64>;
+    /// Allow multiplication on the left by f64 (f64 * vector)
+    #[inline]
+    fn mul(self, vector: &Vector<f64>) -> Self::Output {
+        let mut result = Vec::new();
+        for i in 0..vector.size() {
+            result.push( self.clone() * vector.vec[i].clone() );
+        }
+        Self::Output::create( result )
+    }
+}
+
 impl<T: Clone + Number> Div<T> for Vector<T> {
     type Output = Self;
     /// Divide a vector by a scalar (vector / scalar)
@@ -134,12 +147,32 @@ impl<T: Clone + Number> AddAssign for Vector<T> {
     }
 }
 
-impl<T: Clone + Number> SubAssign for Vector<T> {
+impl<T: Clone + Number> SubAssign<&Vector<T>> for Vector<T> {
     /// Substract a vector from a mutable vector and assign the result ( -= )
+    fn sub_assign(&mut self, rhs: &Vector<T>) {
+        if self.size() != rhs.size() { panic!( "Vector sizes do not agree (-=)." ); }
+        for i in 0..self.size() {
+            self.vec[i] -= rhs.vec[i].clone();
+        }
+    }
+}
+
+impl<T: Clone + Number> SubAssign for Vector<T> {
+    /// Subtract a vector from a mutable vector and assign the result ( -= )
     fn sub_assign(&mut self, rhs: Self) {
         if self.size() != rhs.size() { panic!( "Vector sizes do not agree (-=)." ); }
         for i in 0..self.size() {
             self.vec[i] -= rhs.vec[i].clone();
+        }
+    }
+}
+
+impl<T: Clone + Number> AddAssign<&Vector<T>> for Vector<T> {
+    /// Add a vector to a mutable vector and assign the result ( += )
+    fn add_assign(&mut self, rhs: &Self) {
+        if self.size() != rhs.size() { panic!( "Vector sizes do not agree (+=)." ); }
+        for i in 0..self.size() {
+            self.vec[i] += rhs.vec[i].clone();
         }
     }
 }
