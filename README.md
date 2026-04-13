@@ -19,8 +19,8 @@ ohsl (ostensibly handy scientific library) is a collection of numerical routines
   - [x] Sparse matrices
 - [ ] Sparse eigensystems
 - [ ] Chebyshev approximation
-- [ ] Ordinary differential equations
-  - [ ] Initial value problems
+- [x] Ordinary differential equations
+  - [x] Initial value problems
   - [x] Boundary value problems 
 
 ## Command line 

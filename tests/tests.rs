@@ -24,3 +24,6 @@ mod polynomial;
 
 #[path = "ode_bvp/ode_bvp.rs"]
 mod ode_bvp;
+
+#[path = "ode_ivp/ode_ivp.rs"]
+mod ode_ivp;

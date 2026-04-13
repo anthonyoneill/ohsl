@@ -77,7 +77,6 @@ impl ODEBVP<f64> {
             }
         }
 
-
         Err( max_residual )
     }
 
