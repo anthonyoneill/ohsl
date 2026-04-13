@@ -76,11 +76,9 @@ fn rk4_second_order() {
     let mut initial_conditions = Vec64::new( 2, 0.0 ); // y(0) = 0, y'(0) = 1
     initial_conditions[1] = 1.0; // y'(0) = 1
     let result = ode_ivp.rk4( &second_order_func, initial_conditions );
-    assert!( result.is_ok() );
+    assert!( result.is_ok() && !result.is_err() );
     let y_final = ode_ivp.solution.get_interpolated_vars( 2.0 * std::f64::consts::PI );
-    let mut y_exact = Vec64::new( 2, 0.0 );
-    y_exact[0] = 0.0; // sin(2pi) = 0
-    y_exact[1] = 1.0; // cos(2pi) = 1
+    let y_exact = Vec64::create( vec![ 0.0, 1.0 ] ); 
     let error = ( y_final.clone() - y_exact.clone() ).norm_inf();
     /*println!( "RK4 solution at x = 2pi: y = [{:.6e}, {:.6e}]", y_final[0], y_final[1] );
     println!( "Exact solution at x = 2pi: y = [{:.6e}, {:.6e}]", y_exact[0], y_exact[1] );
@@ -107,7 +105,7 @@ fn rkf45_first_order() {
         Ok( () ) => println!( "RKF45 completed successfully." ),
         Err( ref e ) => println!( "RKF45 failed: {}", e ),
     }
-    assert!( result.is_ok() );
+    assert!( result.is_ok() && !result.is_err() );
     //let y_final = ode_ivp.solution.get_nodes_vars( n );
     let y_final = ode_ivp.solution.get_interpolated_vars( 1.0 );
     let y_exact = 2.0 * (-2.0f64).exp() + 1.0f64.exp();
@@ -144,11 +142,9 @@ fn rkf45_second_order() {
         Ok( () ) => println!( "RKF45 completed successfully." ),
         Err( ref e ) => println!( "RKF45 failed: {}", e ),
     }
-    assert!( result.is_ok() );
+    assert!( result.is_ok() && !result.is_err() );
     let y_final = ode_ivp.solution.get_interpolated_vars( 2.0 * std::f64::consts::PI );
-    let mut y_exact = Vec64::new( 2, 0.0 );
-    y_exact[0] = 0.0; // sin(2pi) = 0
-    y_exact[1] = 1.0; // cos(2pi) = 1
+    let y_exact = Vec64::create( vec![ 0.0, 1.0 ] ); 
     let error = ( y_final.clone() - y_exact.clone() ).norm_inf();
     /*println!( "RKF45 solution at x = 2pi: y = [{:.6e}, {:.6e}]", y_final[0], y_final[1] );
     println!( "Exact solution at x = 2pi: y = [{:.6e}, {:.6e}]", y_exact[   0], y_exact[1] );

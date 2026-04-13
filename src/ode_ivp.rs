@@ -224,7 +224,7 @@ impl ODEIVP<f64> {
 
             e -= &z;
             diff = e.norm_inf();
-            c = (self.tol * h / ( 2. * diff )).sqrt().sqrt(); // TODO is the correct should it be ^(1/5) ?
+            c = (self.tol * h / ( 2. * diff )).sqrt().sqrt();
             ok = true;
 
             // is the first step ok? or does it need reducing?
@@ -237,7 +237,6 @@ impl ODEIVP<f64> {
             if ok {
                 x += h;
                 u += z;
-
                 if step % self.store_every == 0 {
                     coords.push( x );
                     values.push( u.clone() );
