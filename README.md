@@ -2,7 +2,7 @@
 ohsl (ostensibly handy scientific library) is a collection of numerical routines written in Rust. The library includes routines in the following areas:
 
 - [x] Complex numbers
-- [ ] Quaternions 
+- [x] Quaternions 
 - [ ] Hyperreal numbers
 - [ ] Special functions
 - [ ] Numerical differentiation

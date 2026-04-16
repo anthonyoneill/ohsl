@@ -51,6 +51,8 @@ impl<T: Clone + Signed> Neg for Complex<T> {
     }
 }
 
+//TODO need to do non-consuming versions of these operators
+
 impl<T: Clone + Number> Add<Complex<T>> for Complex<T> {
     type Output = Self;
     /// Add two complex numbers together ( binary + )

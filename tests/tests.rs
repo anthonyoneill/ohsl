@@ -27,3 +27,6 @@ mod ode_bvp;
 
 #[path = "ode_ivp/ode_ivp.rs"]
 mod ode_ivp;
+
+#[path = "quaternion/quaternion.rs"]
+mod quaternion;
