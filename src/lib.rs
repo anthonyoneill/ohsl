@@ -3,8 +3,6 @@
 //! `ohsl` is a collection of numerical routines and mathematical types
 //! for use in scientific computing. 
 
-//TODO quaternion.rs -> implement as a scalar and vector part in a struct + examples
-
 pub mod constant;
 pub mod complex;
 pub mod vector;
@@ -19,6 +17,7 @@ pub mod banded;
 pub mod sparse;
 pub mod ode_bvp;
 pub mod ode_ivp;
+pub mod quaternion;
 
 // Re-exports
 pub use self::complex::{Complex, Cmplx};
@@ -34,3 +33,4 @@ pub use self::banded::Banded;
 pub use self::sparse::Sparse;
 pub use self::ode_bvp::ODEBVP;
 pub use self::ode_ivp::ODEIVP;
+pub use self::quaternion::{Quaternion, Quat64};
