@@ -2,7 +2,7 @@ pub use crate::vector::Vector;
 pub use crate::traits::{Number, Signed, Zero};
 pub use crate::complex::Complex;
 
-impl<T: Clone + Signed> Vector<Complex::<T>> {
+impl<T: Clone + Copy + Signed> Vector<Complex::<T>> {
     /// Return a vector containing the complex conjugate of the elements
     #[inline]
     pub fn conj(&self) -> Self {

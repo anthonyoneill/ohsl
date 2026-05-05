@@ -30,3 +30,9 @@ mod ode_ivp;
 
 #[path = "quaternion/quaternion.rs"]
 mod quaternion;
+
+#[path = "halley/halley.rs"]
+mod halley;
+
+#[path = "triad/triad.rs"]
+mod triad;

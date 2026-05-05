@@ -18,6 +18,8 @@ pub mod sparse;
 pub mod ode_bvp;
 pub mod ode_ivp;
 pub mod quaternion;
+pub mod halley;
+pub mod triad;
 
 // Re-exports
 pub use self::complex::{Complex, Cmplx};
@@ -34,3 +36,5 @@ pub use self::sparse::Sparse;
 pub use self::ode_bvp::ODEBVP;
 pub use self::ode_ivp::ODEIVP;
 pub use self::quaternion::{Quaternion, Quat64};
+pub use self::halley::Halley;
+pub use self::triad::{Triad, Tri64};

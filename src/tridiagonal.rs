@@ -191,7 +191,7 @@ impl<T: Clone + Copy + Zero + Number> Tridiagonal<T> {
     }
 }
 
-impl<T: Clone + Signed> Tridiagonal::<Complex::<T>> {
+impl<T: Clone + Copy + Signed> Tridiagonal::<Complex::<T>> {
     /// Return the conjugate of the tridiagonal matrix
     #[inline]
     pub fn conj( &self ) -> Self {

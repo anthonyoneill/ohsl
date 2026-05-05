@@ -16,10 +16,10 @@ fn constructor() {
 #[test]
 fn parameters() {
     let mut newton = Newton::<f64>::new( 0.0 );
-    newton.tolerance( 1.0e-6 );
-    newton.delta( 1.0e-7 );
-    newton.iterations( 25 );
-    newton.guess( 1.0 );
+    newton.tol = 1.0e-6;
+    newton.delta = 1.0e-7;
+    newton.max_iter = 25;
+    newton.guess = 1.0;
     let parameters = newton.parameters();
     assert_eq!( parameters.0, 1.0e-6 );
     assert_eq!( parameters.1, 1.0e-7 );
@@ -27,7 +27,7 @@ fn parameters() {
     assert_eq!( parameters.3, 1.0 );
 }
 
-fn x_squared_minus_four(x: f64) -> f64 {
+fn x_squared_minus_four(x: &f64) -> f64 {
     x * x - 4.0
 }
 
@@ -35,13 +35,63 @@ fn x_squared_minus_four(x: f64) -> f64 {
 fn solve_f64() {
     let mut newton = Newton::<f64>::new( 1.0 );
     let solution = newton.solve( &x_squared_minus_four );
-    assert_eq!( solution.unwrap(), 2.0 );
-    newton.guess( -1.0 );
-    let solution = newton.solve( &x_squared_minus_four ).unwrap();
-    assert_eq!( solution, -2.0 );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, 2.0 );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = -1.0;
+    let solution = newton.solve( &x_squared_minus_four );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, -2.0 );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
 }
 
-fn vecfunc( x: Vec64 ) -> Vec64 {
+fn x_squared_minus_four_derivative(x: &f64) -> f64 {
+    2.0 * x
+}
+
+#[test]
+fn solve_f64_derivative() {
+    let mut newton = Newton::<f64>::new( 1.0 );
+    let solution = newton.solve_derivative( &x_squared_minus_four, &x_squared_minus_four_derivative );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, 2.0 );
+            println!( "Newton with derivative converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with derivative failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = -1.0;
+    let solution = newton.solve_derivative( &x_squared_minus_four, &x_squared_minus_four_derivative );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, -2.0 );
+            println!( "Newton with derivative converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with derivative failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+}
+
+fn vecfunc( x: &Vec64 ) -> Vec64 {
     let mut f = Vec64::new( 2, 0.0 );
     f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
     f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
@@ -56,7 +106,7 @@ fn vecfunc( x: Vec64 ) -> Vec64 {
 #[test]
 fn jacobian() {
     let point = Vec64::create( vec![ 1.0, 1.0 ] );
-    let jacobian = Mat64::jacobian( point, &vecfunc, 1.0e-8 );
+    let jacobian = Mat64::jacobian( &point, &vecfunc, 1.0e-8 );
     assert_eq!( jacobian.rows(), 2 );
     assert_eq!( jacobian.cols(), 2 );
     assert!( ( jacobian[(0,0)] - 3.0 ).abs() < 1.0e-6 );
@@ -69,12 +119,21 @@ fn jacobian() {
 fn solve_vec64() {
     let guess = Vec64::create( vec![ 0.5, 0.25 ] );
     let newton = Newton::<Vec64>::new( guess );
-    let solution = newton.solve( &vecfunc ).unwrap();
-    assert!( ( solution[0] - 1.0) < 1.0e-8 );
-    assert!( ( solution[1] - 0.0) < 1.0e-8 );
+    let solution = newton.solve( &vecfunc );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - 1.0).abs() < 1.0e-8 );
+            assert!( ( sol[1] - 0.0).abs() < 1.0e-8 );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
 }
 
-fn jacfunc( x: Vec64 ) -> Mat64 {
+fn jacfunc( x: &Vec64 ) -> Mat64 {
     let mut j = Mat64::new( 2, 2, 0.0 );
     j[(0,0)] = 3.0 * f64::powf( x[0], 2.0 );
     j[(0,1)] = 1.0;
@@ -91,12 +150,21 @@ fn jacfunc( x: Vec64 ) -> Mat64 {
 fn exact_jacobian_solve() {
     let guess = Vec64::create( vec![ 0.5, 0.25 ] );
     let newton = Newton::<Vec64>::new( guess );
-    let solution = newton.solve_jacobian( &vecfunc, &jacfunc ).unwrap();
-    assert!( ( solution[0] - 1.0) < 1.0e-8 );
-    assert!( ( solution[1] - 0.0) < 1.0e-8 );
+    let solution = newton.solve_jacobian( &vecfunc, &jacfunc );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - 1.0).abs() < 1.0e-8 );
+            assert!( ( sol[1] - 0.0).abs() < 1.0e-8 );
+            println!( "Newton with Jacobian converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with Jacobian failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
 }
 
-fn x_cubed_minus_two(x: Cmplx) -> Cmplx {
+fn x_cubed_minus_two(x: &Cmplx) -> Cmplx {
     x * x * x - 2.0
 }
 
@@ -104,20 +172,89 @@ fn x_cubed_minus_two(x: Cmplx) -> Cmplx {
 fn solve_cmplx() {
     let mut newton = Newton::<Cmplx>::new( Cmplx::new( 1.0, 0.0 ) );
     let solution = newton.solve( &x_cubed_minus_two );
-    assert_eq!( solution.unwrap(), Cmplx::new( 1.2599210498948732, 0.0 ) );
-    newton.guess( Cmplx::new( -1.0, 1.0 ) );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, Cmplx::new( 1.2599210498948732, 0.0 ) );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = Cmplx::new( -1.0, 1.0 );
     let solution = newton.solve( &x_cubed_minus_two );
-    assert_eq!( solution.unwrap(), Cmplx::new( -0.6299605249474366, 1.0911236359717214 ) );
-    newton.guess( Cmplx::new( -1.0, -1.0 ) );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, Cmplx::new( -0.6299605249474366, 1.0911236359717214 ) );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = Cmplx::new( -1.0, -1.0 );
     let solution = newton.solve( &x_cubed_minus_two );
-    assert_eq!( solution.unwrap(), Cmplx::new( -0.6299605249474366, -1.0911236359717214 ) );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, Cmplx::new( -0.6299605249474366, -1.0911236359717214 ) );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
 }
 
-fn vecfunc_cmplx( x: Vector<Cmplx> ) -> Vector<Cmplx> {
+fn x_cubed_minus_two_derivative(x: &Cmplx) -> Cmplx {
+    3.0 * x * x
+}
+
+#[test]
+fn solve_cmplx_derivative() {
+    let mut newton = Newton::<Cmplx>::new( Cmplx::new( 1.0, 0.0 ) );
+    let solution = newton.solve_derivative( &x_cubed_minus_two, &x_cubed_minus_two_derivative );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, Cmplx::new( 1.2599210498948732, 0.0 ) );
+            println!( "Newton with derivative converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with derivative failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = Cmplx::new( -1.0, 1.0 );
+    let solution = newton.solve_derivative( &x_cubed_minus_two, &x_cubed_minus_two_derivative );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, Cmplx::new( -0.6299605249474366, 1.0911236359717214 ) );
+            println!( "Newton with derivative converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with derivative failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = Cmplx::new( -1.0, -1.0 );
+    let solution = newton.solve_derivative( &x_cubed_minus_two, &x_cubed_minus_two_derivative );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert_eq!( sol, Cmplx::new( -0.6299605249474366, -1.0911236359717214 ) );
+            println!( "Newton with derivative converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with derivative failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+}
+
+fn vecfunc_cmplx( x: &Vector<Cmplx> ) -> Vector<Cmplx> {
     let mut f = Vector::<Cmplx>::new( 2, Cmplx::new( 0.0, 0.0 ) );
-    //f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
     f[0] = x[0].powf( 3.0 ) + x[1] + Cmplx::new( -1.0, 0.0 );
-    //f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
     f[1] = x[1].powf( 3.0 ) - x[0] + Cmplx::new( 1.0, 0.0 );
     /*
         x^3 + y - 1 = 0,
@@ -130,7 +267,7 @@ fn vecfunc_cmplx( x: Vector<Cmplx> ) -> Vector<Cmplx> {
 #[test]
 fn jacobian_cmplx() {
     let point = Vector::<Cmplx>::create( vec![ Cmplx::new( 1.0, 0.0 ), Cmplx::new( 1.0, 0.0 ) ] );
-    let jacobian = Matrix::<Cmplx>::jacobian_cmplx( point, &vecfunc_cmplx, 1.0e-8 );
+    let jacobian = Matrix::<Cmplx>::jacobian_cmplx( &point, &vecfunc_cmplx, 1.0e-8 );
     assert_eq!( jacobian.rows(), 2 );
     assert_eq!( jacobian.cols(), 2 );
     assert!( ( jacobian[(0,0)] - 3.0 ).abs() < 1.0e-6 );
@@ -143,16 +280,34 @@ fn jacobian_cmplx() {
 fn solve_vec_cmplx() {
     let guess = Vector::<Cmplx>::create( vec![ Cmplx::new( 0.5, 0.0 ), Cmplx::new( 0.25, 0.0 ) ] );
     let mut newton = Newton::<Vector::<Cmplx>>::new( guess );
-    let solution = newton.solve( &vecfunc_cmplx ).unwrap();
-    assert!( ( solution[0] - 1.0).abs() < 1.0e-8 );
-    assert!( ( solution[1] - 0.0).abs() < 1.0e-8 );
-    newton.guess( Vector::<Cmplx>::create( vec![ Cmplx::new( 1.5, 0.2 ), Cmplx::new( -0.05, -0.5 ) ] ) );
-    let solution = newton.solve( &vecfunc_cmplx ).unwrap();
-    assert!( ( solution[0] - Cmplx::new( 1.045104845532415, 0.17282103284313127 )).abs() < 1.0e-8 );
-    assert!( ( solution[1] - Cmplx::new( -0.047866859044606, -0.561126615525250 )).abs() < 1.0e-8 );
+    let solution = newton.solve( &vecfunc_cmplx );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - 1.0).abs() < 1.0e-8 );
+            assert!( ( sol[1] - 0.0).abs() < 1.0e-8 );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = Vector::<Cmplx>::create( vec![ Cmplx::new( 1.5, 0.2 ), Cmplx::new( -0.05, -0.5 ) ] );
+    let solution = newton.solve( &vecfunc_cmplx );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - Cmplx::new( 1.045104845532415, 0.17282103284313127 )).abs() < 1.0e-8 );
+            assert!( ( sol[1] - Cmplx::new( -0.047866859044606, -0.561126615525250 )).abs() < 1.0e-8 );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
 }
 
-fn jacfunc_cmplx( x: Vector<Cmplx> ) -> Matrix<Cmplx> {
+fn jacfunc_cmplx( x: &Vector<Cmplx> ) -> Matrix<Cmplx> {
     let mut j = Matrix::<Cmplx>::new( 2, 2, Cmplx::new( 0.0, 0.0 ) );
     j[(0,0)] = 3.0 * x[0].powf( 2.0 );
     j[(0,1)] = Cmplx::new( 1.0, 0.0 );
@@ -169,11 +324,29 @@ fn jacfunc_cmplx( x: Vector<Cmplx> ) -> Matrix<Cmplx> {
 fn exact_jacobian_solve_cmplx() {
     let guess = Vector::<Cmplx>::create( vec![ Cmplx::new( 0.5, 0.0 ), Cmplx::new( 0.25, 0.0 ) ] );
     let mut newton = Newton::<Vector::<Cmplx>>::new( guess );
-    let solution = newton.solve_jacobian( &vecfunc_cmplx, &jacfunc_cmplx ).unwrap();
-    assert!( ( solution[0] - 1.0).abs() < 1.0e-8 );
-    assert!( ( solution[1] - 0.0).abs() < 1.0e-8 );
-    newton.guess( Vector::<Cmplx>::create( vec![ Cmplx::new( 1.5, 0.2 ), Cmplx::new( -0.05, -0.5 ) ] ) );
-    let solution = newton.solve( &vecfunc_cmplx ).unwrap();
-    assert!( ( solution[0] - Cmplx::new( 1.045104845532415, 0.17282103284313127 )).abs() < 1.0e-8 );
-    assert!( ( solution[1] - Cmplx::new( -0.047866859044606, -0.561126615525250 )).abs() < 1.0e-8 );
+    let solution = newton.solve_jacobian( &vecfunc_cmplx, &jacfunc_cmplx );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - 1.0).abs() < 1.0e-8 );
+            assert!( ( sol[1] - 0.0).abs() < 1.0e-8 );
+            println!( "Newton with Jacobian converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton with Jacobian failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+    newton.guess = Vector::<Cmplx>::create( vec![ Cmplx::new( 1.5, 0.2 ), Cmplx::new( -0.05, -0.5 ) ] );
+    let solution = newton.solve( &vecfunc_cmplx );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - Cmplx::new( 1.045104845532415, 0.17282103284313127 )).abs() < 1.0e-8 );
+            assert!( ( sol[1] - Cmplx::new( -0.047866859044606, -0.561126615525250 )).abs() < 1.0e-8 );
+            println!( "Newton converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Newton failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
 }

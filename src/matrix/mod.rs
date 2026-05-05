@@ -11,7 +11,7 @@ pub use crate::vector::{Vector, Vec64};
 
 #[derive(PartialEq)]
 pub struct Matrix<T> {
-    mat: Vec<T>,
+    pub mat: Vec<T>,
     rows: usize,
     cols: usize,
 }

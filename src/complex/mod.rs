@@ -51,50 +51,144 @@ impl<T: Clone + Signed> Neg for Complex<T> {
     }
 }
 
-//TODO need to do non-consuming versions of these operators
+// Full non-consuming addition
+impl<T: Clone + Copy + Number> Add<&Complex<T>> for &Complex<T> {
+    type Output = Complex<T>;
+    /// Add two complex numbers together ( binary + )
+    /// ( a + ib ) + ( c + id ) = ( a + c ) + i( b + d )
+    #[inline]
+    fn add(self, plus: &Complex<T>) -> Self::Output {
+        let real = self.real + plus.real;
+        let imag = self.imag + plus.imag;
+        Self::Output::new( real, imag )
+    }
+}
 
-impl<T: Clone + Number> Add<Complex<T>> for Complex<T> {
+// Partial non-consuming addition
+impl<T: Clone + Copy + Number> Add<&Complex<T>> for Complex<T> {
+    type Output = Self;
+    /// Add two complex numbers together ( binary + )
+    /// ( a + ib ) + ( c + id ) = ( a + c ) + i( b + d )
+    #[inline]
+    fn add(self, plus: &Complex<T>) -> Self::Output {
+        &self + plus
+    }
+}
+
+// Consuming addition
+impl<T: Clone + Copy + Number> Add<Complex<T>> for Complex<T> {
     type Output = Self;
     /// Add two complex numbers together ( binary + )
     /// ( a + ib ) + ( c + id ) = ( a + c ) + i( b + d )
     #[inline]
     fn add(self, plus: Self) -> Self::Output {
-        Self::Output::new(self.real + plus.real, self.imag + plus.imag)
+        self + &plus
     }
 }
 
-impl<T: Clone + Number> Sub<Complex<T>> for Complex<T> {
+// Full non-consuming subtraction
+impl<T: Clone + Copy + Number> Sub<&Complex<T>> for &Complex<T> {
+    type Output = Complex<T>;
+    /// Subtract one complex number from another ( binary - )
+    /// ( a + ib ) - ( c + id ) = ( a - c ) + i( b - d )
+    #[inline]
+    fn sub(self, minus: &Complex<T>) -> Self::Output {
+        let real = self.real - minus.real;
+        let imag = self.imag - minus.imag;
+        Self::Output::new( real, imag )
+    }
+}
+
+// Partial non-consuming subtraction
+impl<T: Clone + Copy + Number> Sub<&Complex<T>> for Complex<T> {
+    type Output = Self;
+    /// Subtract one complex number from another ( binary - )
+    /// ( a + ib ) - ( c + id ) = ( a - c ) + i( b - d )
+    #[inline]
+    fn sub(self, minus: &Complex<T>) -> Self::Output {
+        &self - minus
+    }
+}
+
+// Consuming subtraction
+impl<T: Clone + Copy + Number> Sub<Complex<T>> for Complex<T> {
     type Output = Self;
     /// Subtract one complex number from another ( binary - )
     /// ( a + ib ) - ( c + id ) = ( a - c ) + i( b - d )
     #[inline]
     fn sub(self, minus: Self) -> Self::Output {
-        Self::Output::new(self.real - minus.real, self.imag - minus.imag)
+        self - &minus
     }
 }
 
-impl<T: Clone + Number> Mul<Complex<T>> for Complex<T> {
-    type Output = Self;
+// Full non-consuming multiplication
+impl<T: Clone + Copy + Number> Mul<&Complex<T>> for &Complex<T> {
+    type Output = Complex<T>;
     /// Multiply two complex numbers together ( binary * )
     /// ( a + ib ) * ( c + id ) = ( ac - bd ) + i( ad + bc )
     #[inline]
-    fn mul(self, times: Self) -> Self::Output {
-        let real = self.real.clone() * times.real.clone() - self.imag.clone() * times.imag.clone();  
+    fn mul(self, times: &Complex<T>) -> Self::Output {
+        let real = self.real * times.real - self.imag * times.imag;  
         let imag = self.real * times.imag + self.imag * times.real;
         Self::Output::new( real, imag )
     }
 }
 
-impl<T: Clone + Number> Div<Complex<T>> for Complex<T> {
+// Partial non-consuming multiplication
+impl<T: Clone + Copy + Number> Mul<&Complex<T>> for Complex<T> {
+    type Output = Self;
+    /// Multiply two complex numbers together ( binary * )
+    /// ( a + ib ) * ( c + id ) = ( ac - bd ) + i( ad + bc )
+    #[inline]
+    fn mul(self, times: &Complex<T>) -> Self::Output {
+        &self * times
+    }
+}
+
+// Consuming multiplication
+impl<T: Clone + Copy + Number> Mul<Complex<T>> for Complex<T> {
+    type Output = Self;
+    /// Multiply two complex numbers together ( binary * )
+    /// ( a + ib ) * ( c + id ) = ( ac - bd ) + i( ad + bc )
+    #[inline]
+    fn mul(self, times: Self) -> Self::Output {
+        self * &times
+    }
+}
+
+// Full non-consuming division
+impl<T: Clone + Copy + Number> Div<&Complex<T>> for &Complex<T> {
+    type Output = Complex<T>;
+    /// Divide one complex number by another ( binary / )
+    /// ( a + ib ) / ( c + id ) = [( ac + bd ) + i( bc - ad )] / ( c^2 + d^2 )
+    #[inline]
+    fn div(self, divisor: &Complex<T>) -> Self::Output {
+        let denominator = divisor.real * divisor.real + divisor.imag * divisor.imag;
+        let real = self.real * divisor.real + self.imag * divisor.imag;  
+        let imag = self.imag * divisor.real - self.real * divisor.imag;
+        Self::Output::new( real / denominator, imag / denominator )
+    }
+}
+
+// Partial non-consuming division
+impl<T: Clone + Copy + Number> Div<&Complex<T>> for Complex<T> {
+    type Output = Self;
+    /// Divide one complex number by another ( binary / )
+    /// ( a + ib ) / ( c + id ) = [( ac + bd ) + i( bc - ad )] / ( c^2 + d^2 )
+    #[inline]
+    fn div(self, divisor: &Complex<T>) -> Self::Output {
+        &self / divisor
+    }
+}
+
+// Consuming division
+impl<T: Clone + Copy + Number> Div<Complex<T>> for Complex<T> {
     type Output = Self;
     /// Divide one complex number by another ( binary / )
     /// ( a + ib ) / ( c + id ) = [( ac + bd ) + i( bc - ad )] / ( c^2 + d^2 )
     #[inline]
     fn div(self, divisor: Self) -> Self::Output {
-        let denominator = divisor.real.clone() * divisor.real.clone() + divisor.imag.clone() * divisor.imag.clone();
-        let real = self.real.clone() * divisor.real.clone() + self.imag.clone() * divisor.imag.clone();  
-        let imag = self.imag * divisor.real - self.real * divisor.imag;
-        Self::Output::new( real / denominator.clone(), imag / denominator )
+        self / &divisor
     }
 }
 
@@ -122,6 +216,15 @@ impl<T: Clone + Number> Mul<T> for Complex<T>  {
     /// ( a + ib ) * r = (a*r) + i(b*r) 
     fn mul(self, scalar: T) -> Self::Output {
         Self::Output::new( self.real * scalar.clone(), self.imag * scalar )
+    }
+}
+
+impl Mul<&Complex<f64>> for f64 {
+    type Output = Complex<f64>;
+    /// Allow multiplication on the left by f64 (f64 * complex number)
+    #[inline]
+    fn mul(self, complex: &Complex<f64>) -> Self::Output {
+        *complex * self
     }
 }
 
@@ -226,14 +329,14 @@ impl<T: Clone + Number> DivAssign<T> for Complex<T> {
     }
 }
 
-impl<T: Clone + Number> Zero for Complex<T> {
+impl<T: Clone + Copy + Number> Zero for Complex<T> {
     /// Return the additive identity z = 0 + 0i
     fn zero() -> Self {
         Self::new(Zero::zero(), Zero::zero())
     }
 }
 
-impl<T: Clone + Number> One for Complex<T> {
+impl<T: Clone + Copy + Number> One for Complex<T> {
     /// Return the multiplicative identity z = 1 + 0i
     fn one() -> Self {
         Self::new(One::one(), Zero::zero())
@@ -307,7 +410,7 @@ impl<T> fmt::Debug for Complex<T> where
     }
 } 
 
-impl<T: Number + Clone> Number for Complex<T> {
+impl<T: Number + Copy + Clone> Number for Complex<T> {
 
 }
 

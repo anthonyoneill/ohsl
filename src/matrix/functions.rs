@@ -64,37 +64,40 @@ impl Matrix<f64> {
     /// Create the Jacobian matrix of a vector valued function at a point
     /// using finite-differences 
     #[inline]
-    pub fn jacobian( point: Vec64, func: &dyn Fn(Vec64) -> Vec64, delta: f64 ) -> Self {
+    pub fn jacobian( point: &Vec64, func: &dyn Fn(&Vec64) -> Vec64, delta: f64 ) -> Self {
         let n = point.size();
-        let f = func( point.clone() );
+        let f = func( point );
         let m = f.size();
         let mut state = point.clone();
         let mut jac = Mat64::new( m, n, 0.0 );
         for i in 0..n {
             state[i] += delta;
-            let f_new = func( state.clone() ); 
+            let f_new = func( &state ); 
             state[i] -= delta;
             jac.set_col( i, ( f_new - f.clone() ) / delta );
         }
         jac
     }
 
-    
 }
 
 impl Matrix<Cmplx> {
     /// Create the Jacobian matrix of a complex vector valued function at a point
     /// using finite-differences
     #[inline]
-    pub fn jacobian_cmplx( point: Vector<Cmplx>, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>, delta: f64 ) -> Self {
+    pub fn jacobian_cmplx( 
+        point: &Vector<Cmplx>, 
+        func: &dyn Fn(&Vector<Cmplx>) -> Vector<Cmplx>, 
+        delta: f64 
+    ) -> Self {
         let n = point.size();
-        let f = func( point.clone() );
+        let f = func( point );
         let m = f.size();
         let mut state = point.clone();
         let mut jac = Matrix::<Cmplx>::new( m, n, Cmplx::new( 0.0, 0.0 ) );
         for i in 0..n {
             state[i] += Cmplx::new( delta, 0.0 );
-            let f_new = func( state.clone() ); 
+            let f_new = func( &state ); 
             state[i] -= Cmplx::new( delta, 0.0 );
             jac.set_col( i, ( f_new - f.clone() ) / Cmplx::new( delta, 0.0 ) );
         }

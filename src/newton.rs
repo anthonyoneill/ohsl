@@ -4,10 +4,10 @@ pub use crate::vector::{Vector, Vec64};
 pub use crate::matrix::{Matrix, Mat64};
 
 pub struct Newton<T> {
-    tol: f64,
-    delta: f64,
-    max_iter: usize,
-    guess: T,
+    pub tol: f64,
+    pub delta: f64,
+    pub max_iter: usize,
+    pub guess: T,
 }
 
 impl<T> Newton<T> {
@@ -19,31 +19,6 @@ impl<T> Newton<T> {
         let max_iter: usize = 20;
         Newton { tol, delta, max_iter, guess }
     }
-
-    /// Edit the convergence tolerance 
-    #[inline]
-    pub fn tolerance(&mut self, tolerance: f64 ) {
-        self.tol = tolerance;
-    }
-
-    /// Edit the finite difference derivative step 
-    #[inline]
-    pub fn delta(&mut self, delta: f64 ) {
-        self.delta = delta;
-    }
-
-    /// Edit the maximum number of iterations 
-    #[inline]
-    pub fn iterations(&mut self, iterations: usize ) {
-        self.max_iter = iterations;
-    }
-
-    /// Edit the initial guess 
-    #[inline]
-    pub fn guess(&mut self, guess: T ) {
-        self.guess = guess;
-    }
-
 }
 
 impl<T: Copy> Newton<T> {
@@ -58,53 +33,87 @@ impl<T: Copy> Newton<T> {
 impl Newton<f64> {
     /// Solve the equation via Newton iteration 
     #[inline]
-    pub fn solve(&self, func: &dyn Fn(f64) -> f64 ) -> Result<f64, f64> {
+    pub fn solve(&self, func: &dyn Fn(&f64) -> f64 ) -> Result<(f64,usize), f64> {
         let mut current: f64 = self.guess;
-        for _ in 0..self.max_iter {
-            let deriv = ( func( current + self.delta ) - 
-                          func( current - self.delta ) ) / ( 2.0 * self.delta );
-            let dx = func(current) / deriv;
+        for iter in 0..self.max_iter {
+            let f_plus = func( &(current + self.delta) );
+            let f_minus = func( &(current - self.delta) );
+            let dx = 2.0 * self.delta * func(&current) / ( f_plus - f_minus );
             current -= dx;
             if dx.abs() <= self.tol {
-                return Ok( current );
+                return Ok( (current, iter+1) );
             }
         }
         Err( current ) 
+    }
+
+    /// Solve the equation via Newton iteration using the exact derivative
+    #[inline]
+    pub fn solve_derivative(&self, 
+        func: &dyn Fn(&f64) -> f64, 
+        derivative: &dyn Fn(&f64) -> f64 
+    ) -> Result<(f64,usize), f64> {
+        let mut current: f64 = self.guess;
+        for iter in 0..self.max_iter {
+            let dx = func(&current) / derivative( &current );
+            current -= dx;
+            if dx.abs() <= self.tol {
+                return Ok( (current, iter+1) );   
+            }
+        }
+        Err( current )
     }
 }
 
 impl Newton<Cmplx> {
     /// Solve the equation via Newton iteration 
     #[inline]
-    pub fn solve(&self, func: &dyn Fn(Cmplx) -> Cmplx ) -> Result<Cmplx, Cmplx> {
+    pub fn solve(&self, func: &dyn Fn(&Cmplx) -> Cmplx ) -> Result<(Cmplx, usize), Cmplx> {
         let mut current: Cmplx = self.guess;
-        for _ in 0..self.max_iter {
-            let deriv = ( func( current + Cmplx::new(self.delta, 0.0) ) - 
-                          func( current - Cmplx::new(self.delta, 0.0) ) ) / ( 2.0 * self.delta );
-            //println!("current: {}, deriv: {}", current, deriv);
-            let dx = func(current) / deriv;
+        let delta = Cmplx::new(self.delta, 0.0);
+        for iter in 0..self.max_iter {
+            let f_plus = func( &(current + delta) );
+            let f_minus = func( &(current - delta) );
+            let dx = 2.0 * delta * func(&current) / ( f_plus - f_minus );
             current -= dx;
             if dx.abs() <= self.tol {
-                return Ok( current );
+                return Ok( (current, iter+1) );
             }
         }
         Err( current ) 
+    }
+
+    /// Solve the equation via Newton iteration using the exact derivative
+    #[inline]
+    pub fn solve_derivative(&self, 
+        func: &dyn Fn(&Cmplx) -> Cmplx, 
+        derivative: &dyn Fn(&Cmplx) -> Cmplx 
+    ) -> Result<(Cmplx, usize), Cmplx> {
+        let mut current: Cmplx = self.guess;
+        for iter in 0..self.max_iter {
+            let dx = func(&current) / derivative( &current );
+            current -= dx;
+            if dx.abs() <= self.tol {
+                return Ok( (current, iter+1) );
+            }
+        }
+        Err( current )
     }
 }
 
 impl Newton<Vec64> {
     /// Solve the vector equation via Newton iteration 
     #[inline] 
-    pub fn solve(&self, func: &dyn Fn(Vec64) -> Vec64) -> Result<Vec64, Vec64> {
+    pub fn solve(&self, func: &dyn Fn(&Vec64) -> Vec64) -> Result<(Vec64,usize), Vec64> {
         let mut current: Vec64 = self.guess.clone();
-        for _ in 0..self.max_iter {
-            let f: Vec64 = func( current.clone() );
+        for iter in 0..self.max_iter {
+            let f: Vec64 = func( &current );
             let max_residual = f.norm_inf();
-            let mut j = Mat64::jacobian( current.clone(), func, self.delta );
+            let mut j = Mat64::jacobian( &current, func, self.delta );
             let dx: Vec64 = j.solve_basic( &f );
             current -= dx;
             if max_residual <= self.tol {
-                return Ok( current )
+                return Ok( (current, iter+1) )
             }
         }
         Err( current )
@@ -112,17 +121,19 @@ impl Newton<Vec64> {
 
     /// Solve the vector equation via Newton iteration using the exact Jacobian
     #[inline] 
-    pub fn solve_jacobian(&self, func: &dyn Fn(Vec64) -> Vec64, 
-                                 jac: &dyn Fn(Vec64) -> Mat64 ) -> Result<Vec64, Vec64> {
+    pub fn solve_jacobian(&self, 
+        func: &dyn Fn(&Vec64) -> Vec64, 
+        jac: &dyn Fn(&Vec64) -> Mat64 
+    ) -> Result<(Vec64,usize), Vec64> {
         let mut current: Vec64 = self.guess.clone();
-        for _ in 0..self.max_iter {
-            let f: Vec64 = func( current.clone() );
+        for iter in 0..self.max_iter {
+            let f: Vec64 = func( &current );
             let max_residual = f.norm_inf();
-            let mut j: Mat64 = jac( current.clone() ); 
+            let mut j: Mat64 = jac( &current ); 
             let dx: Vec64 = j.solve_basic( &f );
             current -= dx;
             if max_residual <= self.tol {
-                return Ok( current )
+                return Ok( (current, iter+1) )
             }
         }
         Err( current )
@@ -132,16 +143,18 @@ impl Newton<Vec64> {
 impl Newton<Vector<Cmplx>> {
     /// Solve the vector equation via Newton iteration 
     #[inline] 
-    pub fn solve(&self, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>) -> Result<Vector<Cmplx>, Vector<Cmplx>> {
+    pub fn solve(&self, 
+        func: &dyn Fn(&Vector<Cmplx>) -> Vector<Cmplx>
+    ) -> Result<(Vector<Cmplx>,usize), Vector<Cmplx>> {
         let mut current: Vector<Cmplx> = self.guess.clone();
-        for _ in 0..self.max_iter {
-            let f: Vector<Cmplx> = func( current.clone() );
+        for iter in 0..self.max_iter {
+            let f: Vector<Cmplx> = func( &current );
             let max_residual = f.norm_inf();
-            let mut j = Matrix::jacobian_cmplx( current.clone(), func, self.delta );
+            let mut j = Matrix::jacobian_cmplx( &current, func, self.delta );
             let dx: Vector<Cmplx> = j.solve_basic( &f );
             current -= dx;
             if max_residual <= self.tol {
-                return Ok( current )
+                return Ok( (current, iter+1) )
             }
         }
         Err( current )
@@ -149,17 +162,19 @@ impl Newton<Vector<Cmplx>> {
 
     /// Solve the vector equation via Newton iteration using the exact Jacobian
     #[inline] 
-    pub fn solve_jacobian(&self, func: &dyn Fn(Vector<Cmplx>) -> Vector<Cmplx>, 
-            jac: &dyn Fn(Vector<Cmplx>) -> Matrix<Cmplx> ) -> Result<Vector<Cmplx>, Vector<Cmplx>> {
+    pub fn solve_jacobian(&self, 
+        func: &dyn Fn(&Vector<Cmplx>) -> Vector<Cmplx>, 
+        jac: &dyn Fn(&Vector<Cmplx>) -> Matrix<Cmplx> 
+    ) -> Result<(Vector<Cmplx>,usize), Vector<Cmplx>> {
         let mut current: Vector<Cmplx> = self.guess.clone();
-        for _ in 0..self.max_iter {
-            let f: Vector<Cmplx> = func( current.clone() );
+        for iter in 0..self.max_iter {
+            let f: Vector<Cmplx> = func( &current );
             let max_residual = f.norm_inf();
-            let mut j: Matrix<Cmplx> = jac( current.clone() ); 
+            let mut j: Matrix<Cmplx> = jac( &current ); 
             let dx: Vector<Cmplx> = j.solve_basic( &f );
             current -= dx;
             if max_residual <= self.tol {
-                return Ok( current )
+                return Ok( (current, iter+1) )
             }
         }
         Err( current )
