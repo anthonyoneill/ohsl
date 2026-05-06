@@ -86,6 +86,41 @@ impl<T: Clone + Number + Copy> Sub<Vector<T>> for Vector<T> {
     }
 }
 
+// Full non-consuming component-wise multiplication
+impl<T: Clone + Number + Copy> Mul<&Vector<T>> for &Vector<T> {
+    type Output = Vector<T>;
+    /// Multiply the elements of two vectors together ( binary * )
+    #[inline]
+    fn mul(self, other: &Vector<T>) -> Self::Output {
+        if self.size() != other.size() { panic!( "Vector sizes do not agree (*)." ); }
+        let mut result = Vector::<T>::new( self.size(), T::zero() );
+        for i in 0..self.size() {
+            result.vec[i] = self.vec[i] * other.vec[i];
+        }
+        result
+    }
+}
+
+// Partial non-consuming component-wise multiplication
+impl<T: Clone + Number + Copy> Mul<&Vector<T>> for Vector<T> {
+    type Output = Self;
+    /// Multiply the elements of two vectors together ( binary * )
+    #[inline]
+    fn mul(self, other: &Self) -> Self::Output {
+        &self * other
+    }
+}
+
+// Consuming component-wise multiplication
+impl<T: Clone + Number + Copy> Mul<Vector<T>> for Vector<T> {
+    type Output = Self;
+    /// Multiply the elements of two vectors together ( binary * )
+    #[inline]
+    fn mul(self, other: Self) -> Self::Output {
+        &self * &other
+    }
+}
+
 impl<T: Clone + Number> Mul<T> for Vector<T> {
     type Output = Self;
     /// Multiply a vector by a scalar (vector * scalar)
@@ -122,6 +157,41 @@ impl Mul<&Vector<f64>> for f64 {
             result.push( self.clone() * vector.vec[i].clone() );
         }
         Self::Output::create( result )
+    }
+}
+
+// Full non-consuming component-wise division
+impl<T: Clone + Number + Copy> Div<&Vector<T>> for &Vector<T> {
+    type Output = Vector<T>;
+    /// Divide the elements of one vector by another ( binary / )
+    #[inline]
+    fn div(self, other: &Vector<T>) -> Self::Output {
+        if self.size() != other.size() { panic!( "Vector sizes do not agree (/)." ); }
+        let mut result = Vector::<T>::new( self.size(), T::zero() );
+        for i in 0..self.size() {
+            result.vec[i] = self.vec[i] / other.vec[i];
+        }
+        result
+    }
+}
+
+// Partial non-consuming component-wise division
+impl<T: Clone + Number + Copy> Div<&Vector<T>> for Vector<T> {
+    type Output = Self;
+    /// Divide the elements of one vector by another ( binary / )
+    #[inline]
+    fn div(self, other: &Self) -> Self::Output {
+        &self / other
+    }
+}
+
+// Consuming component-wise division
+impl<T: Clone + Number + Copy> Div<Vector<T>> for Vector<T> {
+    type Output = Self;
+    /// Divide the elements of one vector by another ( binary / )
+    #[inline]
+    fn div(self, other: Self) -> Self::Output {
+        &self / &other
     }
 }
 

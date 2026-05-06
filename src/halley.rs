@@ -1,4 +1,5 @@
 pub use crate::complex::Cmplx;
+pub use crate::vector::Vec64;
 
 pub struct Halley<T> {
     pub tol: f64,
@@ -116,4 +117,8 @@ impl Halley<Cmplx> {
         }
         Err( current )
     }
+}
+
+impl Halley<Vec64> {
+
 }
