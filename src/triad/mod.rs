@@ -1,5 +1,7 @@
 pub mod operations;
 
+use std::fmt;
+
 pub use crate::traits::{Number, Signed, Zero, One};
 pub use crate::complex::Complex;
 pub use crate::vector::{Vector, Vec64};
@@ -75,5 +77,60 @@ impl<T: Clone> Clone for Triad<T> {
     #[inline]
     fn clone(&self) -> Self {
         Triad { tri: self.tri.clone(), panels: self.panels, rows: self.rows, cols: self.cols }
+    }
+}
+
+impl Triad<f64> {
+    /// Create the Hessian of a vector valued function at a point using finite-differences 
+    #[inline]
+    pub fn hessian( point: &Vec64, func: &dyn Fn(&Vec64) -> Vec64, delta: f64 ) -> Self {
+        let n = point.size();
+        let f = func( point );
+        let m = f.size();
+        //TODO check m = n 
+        let mut state = point.clone();
+        let mut hes = Tri64::new( n, n, n, 0.0 );
+        for j in 0..n {
+            for k in 0..n {
+                state[j] += delta;
+                state[k] += delta;
+                let f_pp = func( &state );
+                state[k] -= 2. * delta;
+                let f_pm = func( &state );
+                state[j] -= 2. * delta;
+                let f_mm = func( &state );
+                state[k] += 2. * delta;
+                let f_mp = func( &state );
+                state[j] += delta;
+                state[k] -= delta;
+                for i in 0..m {
+                    hes[( i, j, k )] = ( f_pp[i] - f_pm[i] - f_mp[i] + f_mm[i] ) / ( 4.0 * delta * delta );
+                }
+            }
+        }
+        hes
+    }
+}
+
+impl<T> fmt::Debug for Triad<T> where
+    T: fmt::Debug
+{
+    /// Format the output 
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        for i in 0..self.panels {
+            writeln!(f, "Panel {}:", i).unwrap();
+            for j in 0..self.rows {
+                for k in 0..self.cols {
+                    write!(f, "\t{:?}", self[( i, j, k )] ).unwrap();
+                }
+                if j < self.rows-1 {
+                    writeln!(f, "").unwrap();
+                }
+            }
+            if i < self.panels-1 {
+                writeln!(f, "").unwrap();
+            }
+        }
+        write!(f, "")
     }
 }

@@ -19,7 +19,7 @@ impl<T: Clone + Copy + Number + Signed + std::cmp::PartialOrd> Matrix<T> {
     }
 
     #[inline]
-    fn backsolve(&self, x: &mut Vector<T> ) {
+    pub fn backsolve(&self, x: &mut Vector<T> ) {
         let last = self.rows - 1;
         x[ last ] = x[ last ] / self[(last,last)];
         for n in 2..self.rows+1 {

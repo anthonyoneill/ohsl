@@ -1,12 +1,13 @@
 use ohsl::halley::Halley;
 use ohsl::complex::Cmplx;
+use ohsl::vector::Vec64;
 
 #[test]
 fn constructor() {
     let halley = Halley::<f64>::new( 0.0 );
     let parameters = halley.parameters();
     assert_eq!( parameters.0, 1.0e-8 );
-    assert_eq!( parameters.1, 1.0e-8 );
+    assert_eq!( parameters.1, 1.0e-6 );
     assert_eq!( parameters.2, 20 );
     assert_eq!( parameters.3, 0.0 );
 }
@@ -194,6 +195,36 @@ fn solve_cmplx_derivative() {
         },
         Err( sol ) => {
             println!( "Halley with derivative failed to converge, last solution was {}", sol );
+            assert!( false );
+        }
+    }
+}
+
+fn vecfunc( x: &Vec64 ) -> Vec64 {
+    let mut f = Vec64::new( 2, 0.0 );
+    f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
+    f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
+    /*
+        x^3 + y - 1 = 0,
+        y^3 - x + 1 = 0,
+        (x,y) = (1,0) is the only (real) solution
+    */
+    f
+}
+
+#[test]
+fn solve_vec64() {
+    let guess = Vec64::create( vec![ 0.5, 0.25 ] );
+    let halley = Halley::<Vec64>::new( guess );
+    let solution = halley.solve( &vecfunc );
+    match solution {
+        Ok( (sol, iter) ) => {
+            assert!( ( sol[0] - 1.0).abs() < 1.0e-8 );
+            assert!( ( sol[1] - 0.0).abs() < 1.0e-8 );
+            println!( "Halley converged in {} iterations", iter );
+        },
+        Err( sol ) => {
+            println!( "Halley failed to converge, last solution was {}", sol );
             assert!( false );
         }
     }

@@ -1,4 +1,5 @@
 use ohsl::triad::Triad;
+use ohsl::vector::Vec64;
 
 #[test]
 fn unspecified_size() {
@@ -111,4 +112,28 @@ fn clone() {
             }
         }
     };
+}
+
+fn vector_function( x: &Vec64 ) -> Vec64 {
+    let mut f = Vec64::new( 2, 0.0 );
+    f[0] = f64::powf( x[0], 3.0 ) + x[1] -1.0;
+    f[1] = f64::powf( x[1], 3.0 ) - x[0] + 1.0;
+    f
+}
+
+#[test]
+fn hessian() {
+    let point = Vec64::create( vec![ 1.0, 1.0 ] );
+    let hes = Triad::<f64>::hessian( &point, &vector_function, 1e-6 );
+    assert_eq!( hes.panels(), 2 );
+    assert_eq!( hes.rows(), 2 );
+    assert_eq!( hes.cols(), 2 );
+    assert!( ( hes[(0,0,0)] - 6.0 ).abs() < 1e-4 );
+    assert!( hes[(0,0,1)].abs() < 1e-4 );
+    assert!( hes[(0,1,0)].abs() < 1e-4 );
+    assert!( hes[(0,1,1)].abs() < 1e-4 );
+    assert!( hes[(1,0,0)].abs() < 1e-4 );
+    assert!( hes[(1,0,1)].abs() < 1e-4 );
+    assert!( hes[(1,1,0)].abs() < 1e-4 );
+    assert!( (hes[(1,1,1)] - 6.0 ).abs() < 1e-4 );
 }

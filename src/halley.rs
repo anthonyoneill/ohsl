@@ -1,5 +1,7 @@
+use crate::Tri64;
 pub use crate::complex::Cmplx;
 pub use crate::vector::Vec64;
+pub use crate::matrix::{Matrix, Mat64};
 
 pub struct Halley<T> {
     pub tol: f64,
@@ -13,7 +15,7 @@ impl<T> Halley<T> {
     #[inline]
     pub const fn new( guess: T ) -> Self {
         let tol: f64 = 1.0e-8;
-        let delta: f64 = 1.0e-8;
+        let delta: f64 = 1.0e-6;
         let max_iter: usize = 20;
         Halley { tol, delta, max_iter, guess }
     }
@@ -120,5 +122,25 @@ impl Halley<Cmplx> {
 }
 
 impl Halley<Vec64> {
-
+    /// Solve the vector equation via Halley iteration 
+    #[inline] 
+    pub fn solve(&self, func: &dyn Fn(&Vec64) -> Vec64) -> Result<(Vec64,usize), Vec64> {
+        let mut current: Vec64 = self.guess.clone();
+        for iter in 0..self.max_iter {
+            let f: Vec64 = func( &current );
+            let max_residual = f.norm_inf();
+            let mut j = Mat64::jacobian( &current, func, self.delta );
+            let a: Vec64 = j.solve_lu( &(-f) ); // LU decompose for second solve
+            let h = Tri64::hessian( &current, func, self.delta );
+            let mut b = h.multiply_twice( &a );
+            j.backsolve( &mut b );
+            b *= 0.5;
+            let dx: Vec64 = (&a * &a) / ( &a + &b );
+            current += dx;
+            if max_residual <= self.tol {
+                return Ok( (current, iter+1) )
+            }
+        }
+        Err( current )
+    }
 }
